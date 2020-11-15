@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <fstream>
 #include "Bus.hpp"
 
 
@@ -18,6 +19,18 @@ class CPU6502
 		Default,
 		PageCrossed, // +1 if to a new page
 		NewPage // +1 if branch succeedes, +2 if to a new page
+	};
+
+
+	enum Flags {
+
+		Carry,
+		Zero,
+		Interrupt,
+		Decimal,
+		Break,
+		Overflow,
+		Negative
 	};
 
 
@@ -45,7 +58,14 @@ class CPU6502
 
 public:
 
+	const uint16_t ROM_MEMORY_BEGINNING = 0x4020;
+	const uint16_t STACK_BEGINNING = 0x0100;
+
 	Bus bus;
+
+	bool acc_memory_switch = false; // If switch is true, then operation is executed on accumulator content
+	                                // else, operation is executed on memory content, its conveniant way for distinct
+	                                // between operation locations that handles an "acc" adressing mode
 
 	// Current instruction components
 
@@ -61,8 +81,7 @@ public:
 	uint8_t acc{ 0 };
 	uint8_t x{ 0 };
 	uint8_t y{ 0 };
-
-	bool flags[8]{0}; // Processor status flags - starting from most significant bit -
+	uint8_t flags{ 0 }; // Processor status flags - starting from most significant bit -
 				      // N V B D I Z C - Negative, Overflow, Break cmd, Decimal mode, 
 					  // Interrupt disable, Zero flag, Carry flag
 
@@ -109,11 +128,17 @@ public:
 
 public:
 
+	void load_rom(std::string file_path);
 	void fetch();
 	void decode();
 	void cpu_cycle();
+	
+	bool extract_flag(Flags flag);
+	void set_flag(Flags flag);
+	void stack_push(uint8_t data);
+	uint8_t stack_pull();
 
-	//INSTRUCTIONS
+	// Instructions
 
 	void ADC(); // Adds memory content and carry flag to accumulator, 
 				// if overflow occurs on bit 7, then carry flag is set to 1,
@@ -251,7 +276,7 @@ public:
 				// negative flag if bit 7 of A is 1
 
 
-	//ADDRESSING MODES
+	// Addressing modes
 
 	void mod_abs(); // Absolute - use 2 bytes operand as address e.g. JMP $a000
 

@@ -1,6 +1,13 @@
 #include "pch.h"
 
-TEST(TestCaseName, TestName) {
-  EXPECT_EQ(1, 1);
-  EXPECT_TRUE(true);
-}
+
+struct CPU6502Test :public::testing::Test {
+
+	void SetUp() override{
+
+	}
+
+	void TearDown() override{
+
+	}
+};
