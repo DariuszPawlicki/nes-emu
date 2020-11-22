@@ -71,7 +71,7 @@ public:
 
 	uint32_t fetched_instr{ 0 }; // Full instruction fetched from memory
 	uint16_t instr_operand{ 0 }; // Operand extracted from full instruction
-	uint16_t target_address{ 0 }; // Adress decoded from instr_operand
+	uint16_t target_address{ 0 }; // Adress decoded based on instr_operand and instruction addressing mode
 	uint8_t instr_opcode{ 0 }; // Op code extracted form full instruction
 
 	// Registers
@@ -82,7 +82,7 @@ public:
 	uint8_t x{ 0 };
 	uint8_t y{ 0 };
 	uint8_t flags{ 0 }; // Processor status flags - starting from most significant bit -
-				      // N V B D I Z C - Negative, Overflow, Break cmd, Decimal mode, 
+				       // N V B D I Z C - Negative, Overflow, Break cmd, Decimal mode, 
 					  // Interrupt disable, Zero flag, Carry flag
 
 	std::map<uint8_t, Instruction> op_map{
@@ -285,33 +285,33 @@ public:
 	void mod_zp();  // Zero page - use 1 byte operand as address e.g. STA $01
 
 	void mod_zpx(); // Zero page X - use 2 bytes operand, first byte is start location at memory
-				// second is an offset e.g. STA $01, X where X = #$02, will store
-				// accumulator in memory address $03
+					// second is an offset e.g. STA $01, X where X = #$02, will store
+					// accumulator in memory address $03
 
 	void mod_zpy(); // Zero page Y - same as ZPX but can only be used with
-				// for storing, loading from/to X register e.g. STX, LDX
+					// for storing, loading from/to X register e.g. STX, LDX
 
 	void mod_absx(); // Absolute X - same as zero page, but uses 2 bytes address $a000, X
 
 	void mod_absy(); // Absolute Y - same as ABSX but uses an Y register
 
 	void mod_imd(); // Immediate - storing operand value in certain register specified
-				// by opcode e.g. LDX #$01, LDY #$01, stores 1 in X and Y registers
+					// by opcode e.g. LDX #$01, LDY #$01, stores 1 in X and Y registers
 
 	void mod_rel(); // Relative - it takes number of bytes as operand that
-				// are specifying an offset from current instruction which is added to PC,
-				// it's used for branching
+					// are specifying an offset from current instruction which is added to PC,
+					// it's used for branching
 
 	void mod_imp(); // Implicit - instuctions like for example INX don't take any operand,
-				// memory location is implied by the opcode
+					// memory location is implied by the opcode
 
 	void mod_idr(); // Indirect - takes an absolute address as a location of least significant
-				// byte of target address, next byte is the most significant byte of an address,
-				// this addressing mode concatenates those two bytes into address of
-				// target memory location e.g. $2000 = $01, $2001 = $02, LDX ($2000) 
-				// concatenate bytes from two memory cells into address $0201 and
-				// load content of this cell into X register
-				// It works only with JMP instruction
+					// byte of target address, next byte is the most significant byte of an address,
+					// this addressing mode concatenates those two bytes into address of
+					// target memory location e.g. $2000 = $01, $2001 = $02, LDX ($2000) 
+					// concatenate bytes from two memory cells into address $0201 and
+					// load content of this cell into X register
+					// It works only with JMP instruction
 
 	void mod_iidrx(); // Indexed indirect X - combination of zero page X and indirect addressing
 				  // e.g. $03 = $a0, $04 = $ff, X = $02, LDA($01, X) will load to accumulator

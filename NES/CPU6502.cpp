@@ -34,7 +34,8 @@ void CPU6502::load_rom(std::string file_path) {
 
 void CPU6502::fetch() {
 
-
+	    //fetching
+	    //pc+=2 or +=3
 }
 
 
@@ -555,75 +556,183 @@ void CPU6502::PLP()
 
 void CPU6502::ROL()
 {
+	bool carry = this->extract_flag(Carry);
 
+	this->flags &= ~0x1;
+
+	if (this->acc_memory_switch == true) {
+
+		this->flags |= (this->acc & 0x80) >> 7;
+		this->acc <<= 1;
+		this->acc += carry;
+
+		if (this->acc == 0)
+			this->set_flag(Zero);
+
+		if (this->acc >= 128)
+			this->set_flag(Negative);
+	}
+	else {
+
+		uint8_t data = this->bus.read(this->target_address);
+
+		this->flags |= (data & 0x80) >> 7;
+
+		data <<= 1;
+		data += carry;
+
+		if (data == 0)
+			this->set_flag(Zero);
+
+		if (data >= 128)
+			this->set_flag(Negative);
+	}
 }
 
 void CPU6502::ROR()
 {
+	bool carry = this->extract_flag(Carry);
+
+	this->flags &= ~0x1;
+
+	if (this->acc_memory_switch == true) {
+
+		this->flags |= (this->acc & 0x1);
+		this->acc >>= 1;
+		this->acc |= carry << 7;
+
+		if (this->acc == 0)
+			this->set_flag(Zero);
+
+		if (this->acc >= 128)
+			this->set_flag(Negative);
+	}
+	else {
+
+		uint8_t data = this->bus.read(this->target_address);
+
+		this->flags |= (data & 0x1);
+		data >>= 1;
+		data |= carry << 7;
+
+		if (data == 0)
+			this->set_flag(Zero);
+
+		if (data >= 128)
+			this->set_flag(Negative);
+	}
 }
 
 void CPU6502::RTI()
 {
+	this->flags = this->stack_pull();
+	this->pc = this->stack_pull();
 }
 
 void CPU6502::RTS()
 {
+	this->pc = this->stack_pull();
 }
 
 void CPU6502::SBC()
 {
+	this->acc -= this->bus.read(this->target_address) - ~(this->extract_flag(Carry));
 }
 
 void CPU6502::SEC()
 {
+	this->set_flag(Carry);
 }
 
 void CPU6502::SED()
 {
+	this->set_flag(Decimal);
 }
 
 void CPU6502::SEI()
 {
+	this->set_flag(Interrupt);
 }
 
 void CPU6502::STA()
 {
+	this->bus.write(this->target_address, this->acc);
 }
 
 void CPU6502::STX()
 {
+	this->bus.write(this->target_address, this->x);
 }
 
 void CPU6502::STY()
 {
+	this->bus.write(this->target_address, this->y);
 }
 
 void CPU6502::TAX()
 {
+	this->x = this->acc;
+
+	if (this->x == 0)
+		this->set_flag(Zero);
+
+	if (this->x >= 128)
+		this->set_flag(Negative);
 }
 
 void CPU6502::TAY()
 {
+	this->y = this->acc;
+
+	if (this->y == 0)
+		this->set_flag(Zero);
+
+	if (this->y >= 128)
+		this->set_flag(Negative);
 }
 
 void CPU6502::TSX()
 {
+	this->x = this->sp;
+
+	if (this->x == 0)
+		this->set_flag(Zero);
+
+	if (this->x >= 128)
+		this->set_flag(Negative);
 }
 
 void CPU6502::TXA()
 {
+	this->acc = this->x;
+
+	if (this->acc == 0)
+		this->set_flag(Zero);
+
+	if (this->acc >= 128)
+		this->set_flag(Negative);
 }
 
 void CPU6502::TXS()
 {
+	this->sp = this->x;
+
 }
 
 void CPU6502::TYA()
 {
+	this->acc = this->y;
+
+	if (this->y == 0)
+		this->set_flag(Zero);
+
+	if (this->y >= 128)
+		this->set_flag(Negative);
 }
 
 void CPU6502::mod_abs()
 {
+	this->target_address = this->instr_operand;
 }
 
 void CPU6502::mod_acc()
@@ -633,47 +742,71 @@ void CPU6502::mod_acc()
 
 void CPU6502::mod_zp()
 {
+	this->target_address = (this->instr_operand & 0x00FF);
 }
 
 void CPU6502::mod_zpx()
 {
+	this->target_address = (this->instr_operand & 0x00FF) + this->x;
 }
 
 void CPU6502::mod_zpy()
 {
+	this->target_address = (this->instr_operand & 0x00FF) + this->y;
 }
 
 void CPU6502::mod_absx()
 {
+	this->target_address = this->instr_operand + this->x;
 }
 
 void CPU6502::mod_absy()
 {
+	this->target_address = this->instr_operand + this->y;
 }
 
 
-void CPU6502::mod_imd() {
-
-	std::cout << "IMD";
+void CPU6502::mod_imd() 
+{
+	return;
 }
 
 void CPU6502::mod_rel()
 {
+	this->pc += (this->instr_operand & 0x00FF);
 }
 
 void CPU6502::mod_imp()
 {
+	return;
 }
 
 void CPU6502::mod_idr()
 {
+	uint8_t least_significant_bit = this->bus.read(this->instr_operand);
+	uint8_t most_significant_bit = this->bus.read(this->instr_operand + 1);
+
+	this->target_address = (uint16_t)most_significant_bit + (uint16_t)least_significant_bit;
 }
 
 void CPU6502::mod_iidrx()
 {
+	uint8_t lsb_loc = (this->instr_operand & 0x00FF) + this->x;
+	uint8_t msb_loc = (this->instr_operand & 0x00FF) + (this->x + 1);
+
+	uint8_t least_significant_bit = this->bus.read(lsb_loc);
+	uint8_t most_significant_bit = this->bus.read(msb_loc);
+
+	this->target_address = (uint16_t)most_significant_bit + (uint16_t)least_significant_bit;
 }
 
 void CPU6502::mod_idriy()
 {
-}
+	uint8_t lsb_loc = (this->instr_operand & 0x00FF);
+	uint8_t msb_loc = (this->instr_operand & 0x00FF) + 1;
 
+	uint8_t least_significant_bit = this->bus.read(lsb_loc);
+	uint8_t most_significant_bit = this->bus.read(msb_loc);
+
+	this->target_address = (uint16_t)most_significant_bit + (uint16_t)least_significant_bit + this->y;
+}
