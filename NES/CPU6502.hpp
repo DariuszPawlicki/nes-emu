@@ -14,6 +14,9 @@ class CPU6502
 	typedef void (CPU6502::*func_ptr)();
 
 
+public:
+
+
 	enum AdditionalCycles {
 
 		Default,
@@ -56,8 +59,6 @@ class CPU6502
 	};
 
 
-public:
-
 	const uint16_t ROM_MEMORY_BEGINNING = 0x4020;
 	const uint16_t STACK_BEGINNING = 0x0100;
 
@@ -82,7 +83,7 @@ public:
 	uint8_t x{ 0 };
 	uint8_t y{ 0 };
 	uint8_t flags{ 0 }; // Processor status flags - starting from most significant bit -
-				       // N V B D I Z C - Negative, Overflow, Break cmd, Decimal mode, 
+				       // N V _ B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode, 
 					  // Interrupt disable, Zero flag, Carry flag
 
 	std::map<uint8_t, Instruction> op_map{
