@@ -95,36 +95,85 @@ bool CPU6502::extract_flag(Flags flag) {
 }
 
 
-void CPU6502::set_flag(Flags flag) {
+void CPU6502::set_flag(Flags flag, bool flag_value) {
 
 	switch (flag) {
 
 		case Carry:
-			this->flags |= 0x1;
+			if (flag_value)
+			{
+				this->flags |= 0x1;
+			}
+			else 
+			{
+				this->flags &= ~0x1;
+			}
 			break;
 
 		case Zero:
-			this->flags |= 0x2;
+			if (flag_value)
+			{
+				this->flags |= 0x2;
+			}
+			else
+			{
+				this->flags &= ~0x2;
+			}
 			break;
 
 		case Interrupt:
-			this->flags |= 0x4;
+			if (flag_value)
+			{
+				this->flags |= 0x4;
+			}
+			else
+			{
+				this->flags &= ~0x4;
+			}
 			break;
 
 		case Decimal:
-			this->flags |= 0x8;
+			if (flag_value)
+			{
+				this->flags |= 0x8;
+			}
+			else
+			{
+				this->flags &= ~0x8;
+			}
 			break;
 
 		case Break:
-			this->flags |= 0x10;
+			if (flag_value)
+			{
+				this->flags |= 0x10;
+			}
+			else
+			{
+				this->flags &= ~0x10;
+			}
 			break;
 
 		case Overflow:
-			this->flags |= 0x40;
+			if (flag_value)
+			{
+				this->flags |= 0x40;
+			}
+			else
+			{
+				this->flags &= ~0x40;
+			}
 			break;
 
 		case Negative:
-			this->flags |= 0x80;
+			if (flag_value)
+			{
+				this->flags |= 0x80;
+			}
+			else
+			{
+				this->flags &= ~0x80;
+			}
 			break;
 	}
 }
@@ -145,21 +194,30 @@ uint8_t CPU6502::stack_pull() {
 }
 
 
+void CPU6502::check_if_overflow() {
+	
+	uint8_t data = this->bus.read(this->target_address);
+
+	bool acc_7b = (this->acc & 0x80) >> 7;
+	bool memory_7b = (data & 0x80) >> 7;
+	bool r_7b = ((this->acc + data) & 0x80) >> 7;
+
+	this->set_flag(Overflow, ~(acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
+}
+
+
 void CPU6502::ADC() {
 
 	uint8_t memory_data = this->bus.read(this->target_address);
 
-	if (this->acc + memory_data + this->extract_flag(Carry) > 255) {
-		this->set_flag(Carry);
-	}
+	this->set_flag(Carry, (uint16_t)this->acc + memory_data + this->extract_flag(Carry) > 255);
+
+	this->check_if_overflow();
 
 	this->acc += memory_data + this->extract_flag(Carry);
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-	
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);	
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 
@@ -167,11 +225,8 @@ void CPU6502::AND() {
 
 	this->acc &= this->bus.read(this->target_address);
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 
@@ -179,33 +234,25 @@ void CPU6502::ASL() {
 
 	if (this->acc_memory_switch == true) {
 
-		if (this->acc >= 128)
-			this->set_flag(Carry);
+		this->set_flag(Carry, this->acc >= 128);
 
 		this->acc <<= 1;
 
-		if (this->acc == 0)
-			this->set_flag(Zero);
-
-		if (this->acc >= 128)
-			this->set_flag(Negative);
+		this->set_flag(Zero, this->acc == 0);
+		this->set_flag(Negative, this->acc >= 128);
 	}
 	else {
 
 		uint8_t data = this->bus.read(this->target_address);
 
-		if (data >= 128)
-			this->set_flag(Carry);
+		this->set_flag(Carry, data >= 128);
 
 		data <<= 1;
 
 		this->bus.write(this->target_address, data);
 
-		if (data == 0)
-			this->set_flag(Zero);
-
-		if (data >= 128)
-			this->set_flag(Negative);
+		this->set_flag(Zero, data == 0);
+		this->set_flag(Negative, data >= 128);
 	}	
 }
 
@@ -234,16 +281,12 @@ void CPU6502::BIT()
 {
 	uint8_t data = this->bus.read(this->target_address);
 	
-	if ((data & 0x40) >> 6 == 1)
-		this->set_flag(Overflow);
-
-	if ((data & 0x80) >> 7 == 1)
-		this->set_flag(Negative);
+	this->set_flag(Overflow, (data & 0x40) >> 6 == 1);
+	this->set_flag(Negative, (data & 0x80) >> 7 == 1);
 
 	data &= this->acc;
 
-	if (data == 0)
-		this->set_flag(Zero);	
+	this->set_flag(Zero, data == 0);
 }
 
 void CPU6502::BMI()
@@ -274,7 +317,7 @@ void CPU6502::BRK()
 
 	this->pc = ((uint16_t)irq_msb << 8) + (uint16_t)irq_lsb;
 
-	this->set_flag(Break);
+	this->set_flag(Break, true);
 
 	this->stack_push(this->flags);
 }
@@ -315,127 +358,87 @@ void CPU6502::CMP()
 {
 	uint8_t data = this->bus.read(this->target_address);
 
-	if (this->acc >= data)
-		this->set_flag(Carry);
-
-	if (this->acc == data)
-		this->set_flag(Zero);
-
-	if (this->acc - data >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Carry, this->acc >= data);
+	this->set_flag(Zero, this->acc == data);
+	this->set_flag(Negative, (uint8_t)(this->acc - data) >= 128);
 }
 
 void CPU6502::CPX()
 {
 	uint8_t data = this->bus.read(this->target_address);
 
-	if (this->x >= data)
-		this->set_flag(Carry);
-
-	if (this->x == data)
-		this->set_flag(Zero);
-
-	if (this->x - data >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Carry, this->x >= data);
+	this->set_flag(Zero, this->x == data);
+	this->set_flag(Negative, (uint8_t)(this->x - data) >= 128);
 }
 
 void CPU6502::CPY()
 {
 	uint8_t data = this->bus.read(this->target_address);
 
-	if (this->y >= data)
-		this->set_flag(Carry);
-
-	if (this->y == data)
-		this->set_flag(Zero);
-
-	if (this->y - data >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Carry, this->y >= data);
+	this->set_flag(Zero, this->y == data);
+	this->set_flag(Negative, (uint8_t)(this->y - data) >= 128);
 }
 
 void CPU6502::DEC()
 {
 	uint8_t data = this->bus.read(this->target_address);
-	
-	data--;
 
-	this->bus.write(this->target_address, data);
+	this->bus.write(this->target_address, --data);
 
-	if (data == 0)
-		this->set_flag(Zero);
-
-	if (data >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, data == 0);
+	this->set_flag(Negative, data >= 128);
 }
 
 void CPU6502::DEX()
 {
 	this->x--;
 
-	if (this->x == 0)
-		this->set_flag(Zero);
-
-	if (this->x >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->x == 0);
+	this->set_flag(Negative, this->x >= 128);
 }
 
 void CPU6502::DEY()
 {
 	this->y--;
 
-	if (this->y == 0)
-		this->set_flag(Zero);
-
-	if (this->y >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->y == 0);
+	this->set_flag(Negative, this->y >= 128);
 }
 
 void CPU6502::EOR()
 {
 	this->acc ^= this->bus.read(this->target_address);
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::INC()
 {
 	uint8_t data = this->bus.read(this->target_address);
 
-	data++;
+	this->bus.write(this->target_address, ++data);
 
-	this->bus.write(this->target_address, data);
-
-	if (data == 0)
-		this->set_flag(Zero);
-
-	if (data >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, data == 0);
+	this->set_flag(Negative, data >= 128);
 }
 
 void CPU6502::INX()
 {
 	this->x++;
 
-	if (this->x == 0)
-		this->set_flag(Zero);
-
-	if (this->x >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->x == 0);
+	this->set_flag(Negative, this->x >= 128);
 }
 
 void CPU6502::INY()
 {
 	this->y++;
 
-	if (this->y == 0)
-		this->set_flag(Zero);
-
-	if (this->y >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->y == 0);
+	this->set_flag(Negative, this->y >= 128);
 }
 
 void CPU6502::JMP()
@@ -444,8 +447,12 @@ void CPU6502::JMP()
 }
 
 void CPU6502::JSR()
-{
-	this->stack_push(this->pc + 2);
+{	
+	this->pc += 2;
+
+	this->stack_push(this->pc >> 8);
+	this->stack_push(this->pc & 0x00FF);
+
 	this->pc = this->target_address;
 }
 
@@ -453,66 +460,49 @@ void CPU6502::LDA()
 {
 	this->acc = this->bus.read(this->target_address);
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::LDX()
 {
 	this->x = this->bus.read(this->target_address);
 
-	if (this->x == 0)
-		this->set_flag(Zero);
-
-	if (this->x >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->x == 0);
+	this->set_flag(Negative, this->x >= 128);
 }
 
 void CPU6502::LDY()
 {
 	this->y = this->bus.read(this->target_address);
 
-	if (this->y == 0)
-		this->set_flag(Zero);
-
-	if (this->y >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->y == 0);
+	this->set_flag(Negative, this->y >= 128);
 }
 
 void CPU6502::LSR()
 {
 	if (this->acc_memory_switch == true) {
 
-		if (this->acc % 2 == 0)
-			this->set_flag(Carry);
+		this->set_flag(Carry, this->acc % 2);
 
 		this->acc >>= 1;
 
-		if (this->acc == 0)
-			this->set_flag(Zero);
-
-		if (this->acc >= 128)
-			this->set_flag(Negative);
+		this->set_flag(Zero, this->acc == 0);
+		this->set_flag(Negative, this->acc >= 128);
 	}
 	else {
 
 		uint8_t data = this->bus.read(this->target_address);
 
-		if (data % 2 == 0)
-			this->set_flag(Carry);
+		this->set_flag(Carry, data % 2);
 
 		data >>= 1;
 
 		this->bus.write(this->target_address, data);
 
-		if (data == 0)
-			this->set_flag(Zero);
-
-		if (data >= 128)
-			this->set_flag(Negative);
+		this->set_flag(Zero, data == 0);
+		this->set_flag(Negative, data >= 128);
 	}
 }
 
@@ -525,11 +515,8 @@ void CPU6502::ORA()
 {
 	this->acc |= this->bus.read(this->target_address);
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::PHA()
@@ -546,11 +533,8 @@ void CPU6502::PLA()
 {
 	this->acc = this->stack_pull();
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::PLP()
@@ -564,17 +548,14 @@ void CPU6502::ROL()
 
 	this->flags &= ~0x1;
 
+	uint8_t tmp;
+
 	if (this->acc_memory_switch == true) {
 
 		this->flags |= (this->acc & 0x80) >> 7;
-		this->acc <<= 1;
-		this->acc += carry;
 
-		if (this->acc == 0)
-			this->set_flag(Zero);
-
-		if (this->acc >= 128)
-			this->set_flag(Negative);
+		tmp = this->acc << 1;
+		tmp += carry;
 	}
 	else {
 
@@ -582,15 +563,12 @@ void CPU6502::ROL()
 
 		this->flags |= (data & 0x80) >> 7;
 
-		data <<= 1;
-		data += carry;
-
-		if (data == 0)
-			this->set_flag(Zero);
-
-		if (data >= 128)
-			this->set_flag(Negative);
+		tmp = data << 1;
+		tmp += carry;		
 	}
+
+	this->set_flag(Zero, tmp == 0);
+	this->set_flag(Negative, tmp >= 128);
 }
 
 void CPU6502::ROR()
@@ -599,69 +577,63 @@ void CPU6502::ROR()
 
 	this->flags &= ~0x1;
 
+	uint8_t tmp;
+
 	if (this->acc_memory_switch == true) {
 
 		this->flags |= (this->acc & 0x1);
-		this->acc >>= 1;
-		this->acc |= carry << 7;
 
-		if (this->acc == 0)
-			this->set_flag(Zero);
-
-		if (this->acc >= 128)
-			this->set_flag(Negative);
+		tmp = this->acc >> 1;
+		tmp |= carry << 7;
 	}
 	else {
 
 		uint8_t data = this->bus.read(this->target_address);
 
 		this->flags |= (data & 0x1);
-		data >>= 1;
-		data |= carry << 7;
 
-		if (data == 0)
-			this->set_flag(Zero);
-
-		if (data >= 128)
-			this->set_flag(Negative);
+		tmp = data >> 1;
+		tmp |= carry << 7;		
 	}
+
+	this->set_flag(Zero, tmp == 0);
+	this->set_flag(Negative, tmp >= 128);
 }
 
 void CPU6502::RTI()
 {
 	this->flags = this->stack_pull();
-	this->pc = this->stack_pull();
+	this->pc = (uint16_t)this->stack_pull() + ((uint16_t)this->stack_pull() << 8);
 }
 
 void CPU6502::RTS()
 {
-	this->pc = this->stack_pull();
+	this->pc = (uint16_t)this->stack_pull() + ((uint16_t)this->stack_pull() << 8);
 }
 
 void CPU6502::SBC()
 {
+	this->check_if_overflow();
+
 	this->acc -= this->bus.read(this->target_address) - ~(this->extract_flag(Carry));
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::SEC()
 {
-	this->set_flag(Carry);
+	this->set_flag(Carry, true);
 }
 
 void CPU6502::SED()
 {
-	this->set_flag(Decimal);
+	this->set_flag(Decimal, true);
 }
 
 void CPU6502::SEI()
 {
-	this->set_flag(Interrupt);
+	this->set_flag(Interrupt, true);
 }
 
 void CPU6502::STA()
@@ -683,44 +655,32 @@ void CPU6502::TAX()
 {
 	this->x = this->acc;
 
-	if (this->x == 0)
-		this->set_flag(Zero);
-
-	if (this->x >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->x == 0);
+	this->set_flag(Negative, this->x >= 128);
 }
 
 void CPU6502::TAY()
 {
 	this->y = this->acc;
 
-	if (this->y == 0)
-		this->set_flag(Zero);
-
-	if (this->y >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->y == 0);
+	this->set_flag(Negative, this->y >= 128);
 }
 
 void CPU6502::TSX()
 {
 	this->x = this->sp;
 
-	if (this->x == 0)
-		this->set_flag(Zero);
-
-	if (this->x >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->x == 0);
+	this->set_flag(Negative, this->x >= 128);
 }
 
 void CPU6502::TXA()
 {
 	this->acc = this->x;
 
-	if (this->acc == 0)
-		this->set_flag(Zero);
-
-	if (this->acc >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->acc == 0);
+	this->set_flag(Negative, this->acc >= 128);
 }
 
 void CPU6502::TXS()
@@ -732,11 +692,8 @@ void CPU6502::TYA()
 {
 	this->acc = this->y;
 
-	if (this->y == 0)
-		this->set_flag(Zero);
-
-	if (this->y >= 128)
-		this->set_flag(Negative);
+	this->set_flag(Zero, this->y == 0);
+	this->set_flag(Negative, this->y >= 128);
 }
 
 void CPU6502::mod_abs()
@@ -795,7 +752,7 @@ void CPU6502::mod_idr()
 	uint8_t least_significant_bit = this->bus.read(this->instr_operand);
 	uint8_t most_significant_bit = this->bus.read(this->instr_operand + 1);
 
-	this->target_address = (uint16_t)most_significant_bit + (uint16_t)least_significant_bit;
+	this->target_address = ((uint16_t)most_significant_bit << 8) + (uint16_t)least_significant_bit;
 }
 
 void CPU6502::mod_iidrx()

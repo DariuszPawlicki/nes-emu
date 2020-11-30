@@ -135,9 +135,10 @@ public:
 	void cpu_cycle();
 	
 	bool extract_flag(Flags flag);
-	void set_flag(Flags flag);
+	void set_flag(Flags flag, bool flag_value);
 	void stack_push(uint8_t data);
 	uint8_t stack_pull();
+	void check_if_overflow();
 
 	// Instructions
 
