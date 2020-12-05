@@ -142,10 +142,12 @@
     <ClCompile Include="Bus.cpp" />
     <ClCompile Include="CPU6502.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ROM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.hpp" />
     <ClInclude Include="CPU6502.hpp" />
+    <ClInclude Include="ROM.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

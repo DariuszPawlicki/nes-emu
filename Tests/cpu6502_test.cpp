@@ -44,26 +44,23 @@ TEST_F(CPU6502Test, StackPull) {
 }
 
 
-TEST_F(CPU6502Test, CheckIfOverflow) {
+TEST_F(CPU6502Test, Adc) {
 
 	processor->acc = 0x50;
 	processor->bus.write(processor->target_address, 0x50);
+	processor->flags = 0b00000001;
 
-	processor->check_if_overflow();
+	processor->ADC();
 
-	ASSERT_EQ(processor->extract_flag(CPU6502::Flags::Overflow), true);
+	ASSERT_EQ(processor->acc, 0xA1);
+	ASSERT_EQ(processor->flags, 0b11000000);
 
-	processor->bus.write(processor->target_address, 0x90);
+	processor->acc = 0xD0;
 
-	processor->check_if_overflow();
+	processor->ADC();
 
-	ASSERT_EQ(processor->extract_flag(CPU6502::Flags::Overflow), false);
-
-	processor->acc = 0xd0;
-
-	processor->check_if_overflow();
-
-	ASSERT_EQ(processor->extract_flag(CPU6502::Flags::Overflow), true);
+	ASSERT_EQ(processor->acc, 0x20);
+	ASSERT_EQ(processor->flags, 0b00000001);
 }
 
 
@@ -777,4 +774,276 @@ TEST_F(CPU6502Test, Rts) {
 	processor->RTS();
 
 	ASSERT_EQ(processor->pc, 0x67A);
+}
+
+
+TEST_F(CPU6502Test, Sbc) {
+
+	processor->acc = 0x50;
+	processor->bus.write(processor->target_address, 0xB0);
+	processor->flags = 0b00000001;
+
+	processor->SBC();
+
+	ASSERT_EQ(processor->acc, 0xA0);
+	ASSERT_EQ(processor->flags, 0b11000001);
+
+	processor->acc = 0xD0;
+
+	processor->SBC();
+
+	ASSERT_EQ(processor->acc, 0x20);
+	ASSERT_EQ(processor->flags, 0b00000001);
+}
+
+
+TEST_F(CPU6502Test, Sec){
+
+	processor->SEC();
+
+	ASSERT_EQ(processor->flags, 0b00000001);
+}
+
+
+TEST_F(CPU6502Test, Sed) {
+
+	processor->SED();
+
+	ASSERT_EQ(processor->flags, 0b00001000);
+}
+
+
+TEST_F(CPU6502Test, Sei) {
+
+	processor->SEI();
+
+	ASSERT_EQ(processor->flags, 0b00000100);
+}
+
+
+TEST_F(CPU6502Test, Sta) {
+
+	processor->acc = 0xF0;
+
+	processor->STA();
+
+	ASSERT_EQ(processor->bus.read(processor->target_address), 0xF0);
+}
+
+
+TEST_F(CPU6502Test, Stx) {
+
+	processor->x = 0xF1;
+
+	processor->STX();
+
+	ASSERT_EQ(processor->bus.read(processor->target_address), 0xF1);
+}
+
+
+TEST_F(CPU6502Test, Sty) {
+
+	processor->y = 0xF2;
+
+	processor->STY();
+
+	ASSERT_EQ(processor->bus.read(processor->target_address), 0xF2);
+}
+
+
+TEST_F(CPU6502Test, Tax) {
+
+	processor->acc = 0xF0;
+
+	processor->TAX();
+
+	ASSERT_EQ(processor->x, 0xF0);
+	ASSERT_EQ(processor->flags, 0b10000000);
+
+	processor->acc = 0x0;
+
+	processor->TAX();
+
+	ASSERT_EQ(processor->x, 0);
+	ASSERT_EQ(processor->flags, 0b00000010);
+}
+
+
+TEST_F(CPU6502Test, Tay) {
+
+	processor->acc = 0xF0;
+
+	processor->TAY();
+
+	ASSERT_EQ(processor->y, 0xF0);
+	ASSERT_EQ(processor->flags, 0b10000000);
+
+	processor->acc = 0;
+
+	processor->TAY();
+
+	ASSERT_EQ(processor->y, 0);
+	ASSERT_EQ(processor->flags, 0b00000010);
+}
+
+
+TEST_F(CPU6502Test, Tsx) {
+
+	processor->TSX();
+
+	ASSERT_EQ(processor->x, 0xFF);
+	ASSERT_EQ(processor->flags, 0b10000000);
+}
+
+
+TEST_F(CPU6502Test, Txa) {
+
+	processor->x = 0xF1;
+
+	processor->TXA();
+
+	ASSERT_EQ(processor->acc, 0xF1);
+	ASSERT_EQ(processor->flags, 0b10000000);
+}
+
+
+TEST_F(CPU6502Test, Txs) {
+
+	processor->x = 0xF1;
+
+	processor->TXS();
+
+	ASSERT_EQ(processor->sp, 0xF1);
+}
+
+
+TEST_F(CPU6502Test, Tya) {
+
+	processor->y = 0xF1;
+
+	processor->TYA();
+
+	ASSERT_EQ(processor->acc, 0xF1);
+	ASSERT_EQ(processor->flags, 0b10000000);
+}
+
+
+TEST_F(CPU6502Test, mod_abs) {
+
+	processor->instr_operand = 0x0600;
+	
+	processor->mod_abs();
+
+	ASSERT_EQ(processor->target_address, 0x0600);
+}
+
+
+TEST_F(CPU6502Test, mod_acc) {
+
+	processor->mod_acc();
+
+	ASSERT_TRUE(processor->acc_memory_switch);
+}
+
+
+TEST_F(CPU6502Test, mod_zp) {
+
+	processor->instr_operand = 0x0100;
+
+	processor->mod_zp();
+
+	ASSERT_EQ(processor->target_address, 0x00);
+}
+
+
+TEST_F(CPU6502Test, mod_zpx) {
+
+	processor->x = 0x0F;
+	processor->instr_operand = 0xF0;
+
+	processor->mod_zpx();
+
+	ASSERT_EQ(processor->target_address, 0xFF);
+}
+
+
+TEST_F(CPU6502Test, mod_zpy) {
+
+	processor->y = 0x0F;
+	processor->instr_operand = 0xF0;
+
+	processor->mod_zpy();
+
+	ASSERT_EQ(processor->target_address, 0xFF);
+}
+
+
+TEST_F(CPU6502Test, mod_absx) {
+
+	processor->instr_operand = 0x0600;
+	processor->x = 0x10;
+
+	processor->mod_absx();
+
+	ASSERT_EQ(processor->target_address, 0x0610);
+}
+
+
+TEST_F(CPU6502Test, mod_absy) {
+
+	processor->instr_operand = 0x0600;
+	processor->y = 0x10;
+
+	processor->mod_absy();
+
+	ASSERT_EQ(processor->target_address, 0x0610);
+}
+
+
+TEST_F(CPU6502Test, mod_rel) {
+
+	processor->instr_operand = 0x10;
+	processor->pc = 0x0600;
+
+	processor->mod_rel();
+
+	ASSERT_EQ(processor->pc, 0x0610);
+}
+
+
+TEST_F(CPU6502Test, mod_idr) {
+
+	processor->instr_operand = 0x0600;
+
+	processor->bus.write(0x600, 0xBA);
+	processor->bus.write(0x601, 0xFC);
+	processor->mod_idr();
+
+	ASSERT_EQ(processor->target_address, 0xFCBA);
+}
+
+
+TEST_F(CPU6502Test, mod_idrx) {
+
+	processor->instr_operand = 0x60;
+	processor->x = 1;
+
+	processor->bus.write(0x61, 0x12);
+	processor->bus.write(0x62, 0x34);
+	processor->mod_idrx();
+
+	ASSERT_EQ(processor->target_address, 0x3412);
+}
+
+
+TEST_F(CPU6502Test, mod_idry) {
+
+	processor->instr_operand = 0x60;
+	processor->y = 2;
+
+	processor->bus.write(0x60, 0x12);
+	processor->bus.write(0x61, 0x34);
+	processor->mod_idry();
+
+	ASSERT_EQ(processor->target_address, 0x3414);
 }

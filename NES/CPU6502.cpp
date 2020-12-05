@@ -194,27 +194,20 @@ uint8_t CPU6502::stack_pull() {
 }
 
 
-void CPU6502::check_if_overflow() {
-	
-	uint8_t data = this->bus.read(this->target_address);
-
-	bool acc_7b = (this->acc & 0x80) >> 7;
-	bool memory_7b = (data & 0x80) >> 7;
-	bool r_7b = ((this->acc + data) & 0x80) >> 7;
-
-	this->set_flag(Overflow, ~(acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
-}
-
-
 void CPU6502::ADC() {
 
 	uint8_t memory_data = this->bus.read(this->target_address);
+	bool carry = this->extract_flag(Carry);
+	uint16_t result = this->acc + memory_data + carry;
 
-	this->set_flag(Carry, (uint16_t)this->acc + memory_data + this->extract_flag(Carry) > 255);
+	bool acc_7b = (this->acc & 0x80) >> 7;
+	bool memory_7b = (memory_data & 0x80) >> 7;
+	bool r_7b = (result & 0x80) >> 7;
+	
+	this->set_flag(Overflow, ~(acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
+	this->set_flag(Carry, result > 255);
 
-	this->check_if_overflow();
-
-	this->acc += memory_data + this->extract_flag(Carry);
+	this->acc = result;
 
 	this->set_flag(Zero, this->acc == 0);	
 	this->set_flag(Negative, this->acc >= 128);
@@ -613,9 +606,18 @@ void CPU6502::RTS()
 
 void CPU6502::SBC()
 {
-	this->check_if_overflow();
+	uint8_t memory_data = this->bus.read(this->target_address);	
+	bool carry = this->extract_flag(Carry);
+	uint16_t result = this->acc + ~memory_data + carry;
 
-	this->acc -= this->bus.read(this->target_address) - ~(this->extract_flag(Carry));
+	bool acc_7b = (this->acc & 0x80) >> 7;
+	bool memory_7b = (memory_data & 0x80) >> 7;
+	bool r_7b = (result & 0x80) >> 7;
+
+	this->set_flag(Overflow, (acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
+	this->set_flag(Carry, ~(result > 255));
+
+	this->acc = result;
 
 	this->set_flag(Zero, this->acc == 0);
 	this->set_flag(Negative, this->acc >= 128);
@@ -755,7 +757,7 @@ void CPU6502::mod_idr()
 	this->target_address = ((uint16_t)most_significant_bit << 8) + (uint16_t)least_significant_bit;
 }
 
-void CPU6502::mod_iidrx()
+void CPU6502::mod_idrx()
 {
 	uint8_t lsb_loc = (this->instr_operand & 0x00FF) + this->x;
 	uint8_t msb_loc = (this->instr_operand & 0x00FF) + (this->x + 1);
@@ -766,7 +768,7 @@ void CPU6502::mod_iidrx()
 	this->target_address = ((uint16_t)most_significant_bit << 8) + (uint16_t)least_significant_bit;
 }
 
-void CPU6502::mod_idriy()
+void CPU6502::mod_idry()
 {
 	uint8_t lsb_loc = (this->instr_operand & 0x00FF);
 	uint8_t msb_loc = (this->instr_operand & 0x00FF) + 1;
