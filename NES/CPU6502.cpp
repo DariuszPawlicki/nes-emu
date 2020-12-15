@@ -4,34 +4,6 @@
 
 
 
-void CPU6502::load_rom(std::string file_path) {
-
-	std::ifstream rom;
-
-	rom.open(file_path, std::ios::binary);
-
-	if (rom.is_open()) {
-
-		rom.seekg(0, rom.end);
-
-		int rom_size = rom.tellg();
-
-		rom.seekg(0, rom.beg);
-
-		char* buffer = new char[rom_size];
-
-		rom.read(buffer, rom_size);		
-
-		for (int i = 0; i < rom_size; i++) {
-
-			this->bus.write(ROM_MEMORY_BEGINNING + i, buffer[i]);
-		}
-
-		delete[] buffer;
-	}	
-}
-
-
 void CPU6502::fetch() {
 
 	    //fetching

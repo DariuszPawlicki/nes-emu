@@ -1,9 +1,9 @@
 #include <iostream>
-#include "CPU6502.hpp"
+#include "NESConsole.hpp"
 
 int main()
 {
-	CPU6502* c = new CPU6502();
+	NESConsole* nes = new NESConsole();
 
-	c->load_rom(std::string("..\\ROMS\\cpu_dummy_writes_oam.nes"));
+	nes->insert_cartridge(std::string("C:\\Users\\Darek\\source\\repos\\NES\\ROMS\\cpu_dummy_reads.nes"));
 }

@@ -129,7 +129,6 @@ public:
 
 public:
 
-	void load_rom(std::string file_path);
 	void fetch();
 	void decode();
 	void cpu_cycle();
