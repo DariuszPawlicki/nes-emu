@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "../NES/CPU6502.cpp"
-#include "../NES/Bus.cpp"
+#include "../NES/src/CPU6502.cpp"
+#include "../NES/src/Bus.cpp"
 
 
 
-struct CPU6502Test :public::testing::Test {
+struct CPU6502Test : public::testing::Test {
 
 	CPU6502* processor;
 
