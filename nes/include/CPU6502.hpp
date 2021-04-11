@@ -76,8 +76,8 @@ public:
 	uint8_t x{ 0 };
 	uint8_t y{ 0 };
 	uint8_t status{ 0 }; // Processor status flags - starting from most significant bit -
-				        // N V _ B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode, 
-					   // Interrupt disable, Zero flag, Carry flag
+				        //  N V _ B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode, 
+					   //   Interrupt disable, Zero flag, Carry flag
 
 	std::unordered_map<uint8_t, Instruction> op_map{
 
@@ -121,9 +121,10 @@ public:
 
 public:
 	void power_up();
-	void cpu_cycle();
+	void cycle();
 	void clear_memory();
 	void write_to_memory(uint16_t address, uint8_t data);
+	uint8_t* read_from_memory(uint16_t address);
 	
 	bool extract_flag(Flags flag);
 	void set_flag(Flags flag, bool flag_value);

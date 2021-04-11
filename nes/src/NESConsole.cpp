@@ -19,6 +19,15 @@ void NESConsole::prg_rom_to_ram()
 
 	for (int i = 0; i < prg_size; i++) 
 		this->cpu.write_to_memory(this->cpu.PRG_ROM_BEGINNING + i, prg_rom_buffer[i]);
+	
+	/* If cartridge contains only one 16 kB memory block, then
+	   it's mirrored - duplicated */
+
+	if(this->cartridge.header.prg_rom_size == 1)
+	{
+		for(int i = 0; i < prg_size; i++)
+			this->cpu.write_to_memory((this->cpu.PRG_ROM_BEGINNING + 16384) + i, prg_rom_buffer[i]);
+	}
 
 	delete[] prg_rom_buffer;
 }
@@ -57,6 +66,6 @@ bool NESConsole::insert_cartridge_and_power_up(std::string rom_path)
 	return false;
 }
 
-void NESConsole::cpu_cycle(){ this->cpu.cpu_cycle(); }
+void NESConsole::cpu_cycle(){ this->cpu.cycle(); }
 
 void NESConsole::show_main_menu() { this->ui.show_main_menu(this->cpu, this->cartridge); }

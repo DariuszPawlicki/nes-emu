@@ -25,7 +25,7 @@ void CPU6502::power_up()
 }
 
 
-void CPU6502::cpu_cycle() 
+void CPU6502::cycle() 
 { 
 	// Fetch
 	
@@ -68,6 +68,8 @@ void CPU6502::cpu_cycle()
 void CPU6502::clear_memory(){ memset(this->bus.memory, 0, 64 * 1024); }
 
 void CPU6502::write_to_memory(uint16_t address, uint8_t data) { this->bus.write(address, data); }
+
+uint8_t* CPU6502::read_from_memory(uint16_t address){ return this->bus.read(address); }
 
 bool CPU6502::extract_flag(CPU6502::Flags flag) 
 {

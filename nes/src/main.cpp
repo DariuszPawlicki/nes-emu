@@ -27,7 +27,7 @@ int main()
         if(nes.is_rom_changed())
             nes.insert_cartridge_and_power_up(nes.get_selected_rom_path());
     
-        window.clear();
+        window.clear(sf::Color(102, 102, 255, 255));
         ImGui::SFML::Render(window);
         window.display();
     }
