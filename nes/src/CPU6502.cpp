@@ -284,20 +284,20 @@ void CPU6502::ASL()
 void CPU6502::BCC()
 {
 	if (this->extract_flag(Carry) == false)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BCS()
 {
 	if (this->extract_flag(Carry) == true) {
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 	}
 }
 
 void CPU6502::BEQ()
 {
 	if (this->extract_flag(Zero) == true)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BIT()
@@ -315,19 +315,19 @@ void CPU6502::BIT()
 void CPU6502::BMI()
 {
 	if (this->extract_flag(Negative) == true)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BNE()
 {
 	if (this->extract_flag(Zero) == false)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BPL()
 {
 	if (this->extract_flag(Negative) == false)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BRK()
@@ -348,13 +348,13 @@ void CPU6502::BRK()
 void CPU6502::BVC()
 {
 	if (this->extract_flag(Overflow) == false)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::BVS()
 {
 	if (this->extract_flag(Overflow) == true)
-		this->pc += this->instr_operand;
+		this->pc = this->instr_operand;
 }
 
 void CPU6502::CLC()
@@ -471,7 +471,7 @@ void CPU6502::JMP()
 
 void CPU6502::JSR()
 {	
-	this->pc += 2;
+	this->pc--;
 
 	this->stack_push(this->pc >> 8);
 	this->stack_push(this->pc & 0x00FF);
@@ -587,7 +587,8 @@ void CPU6502::RTI()
 
 void CPU6502::RTS()
 {
-	this->pc = (uint16_t)this->stack_pull() + ((uint16_t)this->stack_pull() << 8);
+	this->pc = (uint16_t)this->stack_pull();
+	this->pc += ((uint16_t)this->stack_pull() << 8) + 1;
 }
 
 void CPU6502::SBC()
@@ -729,7 +730,6 @@ void CPU6502::mod_absy()
 	this->data_address = this->bus.read(target_address);
 }
 
-
 void CPU6502::mod_imd() 
 {
 	this->data_address = new uint8_t(this->instr_operand);
@@ -737,7 +737,7 @@ void CPU6502::mod_imd()
 
 void CPU6502::mod_rel()
 {
-	this->pc += (this->instr_operand & 0x00FF);
+	this->instr_operand += this->pc;
 }
 
 void CPU6502::mod_imp()

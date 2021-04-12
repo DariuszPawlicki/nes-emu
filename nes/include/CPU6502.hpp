@@ -76,7 +76,7 @@ public:
 	uint8_t x{ 0 };
 	uint8_t y{ 0 };
 	uint8_t status{ 0 }; // Processor status flags - starting from most significant bit -
-				        //  N V _ B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode, 
+				        //  N V U B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode, 
 					   //   Interrupt disable, Zero flag, Carry flag
 
 	std::unordered_map<uint8_t, Instruction> op_map{
@@ -101,7 +101,7 @@ public:
 																																																																																																	{0xF5, Instruction("SBC_ZPX", &CPU6502::SBC, &CPU6502::mod_zpx, 4)},
 		{0x0A, Instruction("ASL_ACC", &CPU6502::ASL, &CPU6502::mod_acc, 2)},						{0xE0, Instruction("CPX_IMD", &CPU6502::CPX, &CPU6502::mod_imd, 2)},							{0x4C, Instruction("JMP_ABS", &CPU6502::JMP, &CPU6502::mod_abs, 3)},							{0xEA, Instruction("NOP_IMP", &CPU6502::NOP, &CPU6502::mod_imp, 2)},							{0xED, Instruction("SBC_ABS", &CPU6502::SBC, &CPU6502::mod_abs, 4)},
 		{0x06, Instruction("ASL_ZP", &CPU6502::ASL, &CPU6502::mod_zp, 5)},							{0xE4, Instruction("CPX_ZP", &CPU6502::CPX, &CPU6502::mod_zp, 3)},								{0x6C, Instruction("JMP_IDR", &CPU6502::JMP, &CPU6502::mod_idr, 5)},																															{0xFD, Instruction("SBC_ABSX", &CPU6502::SBC, &CPU6502::mod_absx, 4, PageCrossed)},
-		{0x16, Instruction("ASL_ZPX", &CPU6502::ASL, &CPU6502::mod_zpx, 6)},						{0xEC, Instruction("CPX_ABS", &CPU6502::CPX, &CPU6502::mod_abs, 4)},							{0x20, Instruction("JSR_ABS", &CPU6502::JMP, &CPU6502::mod_abs, 6)},							{0x09, Instruction("ORA_IMD", &CPU6502::ORA, &CPU6502::mod_imd, 2)},							{0xF9, Instruction("SBC_ABSY", &CPU6502::SBC, &CPU6502::mod_absy, 4, PageCrossed)},
+		{0x16, Instruction("ASL_ZPX", &CPU6502::ASL, &CPU6502::mod_zpx, 6)},						{0xEC, Instruction("CPX_ABS", &CPU6502::CPX, &CPU6502::mod_abs, 4)},							{0x20, Instruction("JSR_ABS", &CPU6502::JSR, &CPU6502::mod_abs, 6)},							{0x09, Instruction("ORA_IMD", &CPU6502::ORA, &CPU6502::mod_imd, 2)},							{0xF9, Instruction("SBC_ABSY", &CPU6502::SBC, &CPU6502::mod_absy, 4, PageCrossed)},
 		{0x0E, Instruction("ASL_ABS", &CPU6502::ASL, &CPU6502::mod_abs, 6)},																																																						{0x05, Instruction("ORA_ZP", &CPU6502::ORA, &CPU6502::mod_zp, 3)},								{0xE1, Instruction("SBC_IDRX", &CPU6502::SBC, &CPU6502::mod_idrx, 6)},
 		{0x1E, Instruction("ASL_ABSX", &CPU6502::ASL, &CPU6502::mod_absx, 7)},																																																						{0x15, Instruction("ORA_ZPX", &CPU6502::ORA, &CPU6502::mod_zpx, 4)},							{0xF1, Instruction("SBC_IDRY", &CPU6502::SBC, &CPU6502::mod_idry, 5, PageCrossed)},
 																																																																									{0x0D, Instruction("ORA_ABS", &CPU6502::ORA, &CPU6502::mod_abs, 4)},
