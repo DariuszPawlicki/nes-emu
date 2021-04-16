@@ -1,4 +1,5 @@
 #include "CPU6502.hpp"
+#include <iostream>
 
 
 
@@ -94,6 +95,10 @@ bool CPU6502::extract_flag(CPU6502::Flags flag)
 		case Break:
 			return (this->status & 0x10) >> 4;
 			break;
+		
+		case Unused:
+			return (this->status & 0x20) >> 5;
+			break;
 
 		case Overflow:
 			return (this->status & 0x40) >> 6;
@@ -167,6 +172,17 @@ void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value)
 				this->status &= ~0x10;
 			}
 			break;
+		
+		case Unused:
+			if (flag_value)
+			{
+				this->status |= 0x20;
+			}
+			else
+			{
+				this->status &= ~0x20;
+			}
+			break;
 
 		case Overflow:
 			if (flag_value)
@@ -192,20 +208,17 @@ void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value)
 	}
 }
 
-
 void CPU6502::stack_push(uint8_t data) 
 {
 	this->bus.write(STACK_BEGINNING + this->sp, data);
 	this->sp--;
 }
 
-
 uint8_t CPU6502::stack_pull() 
 {
 	uint8_t data = *(this->bus.read(STACK_BEGINNING + (++this->sp)));
 	return data;
 }
-
 
 void CPU6502::reset()
 {
@@ -220,7 +233,6 @@ void CPU6502::reset()
 	}
 }
 
-
 void CPU6502::irq()
 {
 	if(this->extract_flag(InterruptDisable) == false)
@@ -232,7 +244,6 @@ void CPU6502::irq()
 	}
 }
 
-
 void CPU6502::nmi()
 {
 	uint8_t vector_lsb = *(this->bus.read(0xFFFA));
@@ -240,7 +251,6 @@ void CPU6502::nmi()
 
 	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
 }
-
 
 void CPU6502::ADC()
 {
@@ -261,7 +271,6 @@ void CPU6502::ADC()
 	this->set_flag(Negative, this->acc >= 128);
 }
 
-
 void CPU6502::AND() 
 {
 	this->acc &= *this->data_address;
@@ -269,7 +278,6 @@ void CPU6502::AND()
 	this->set_flag(Zero, this->acc == 0);
 	this->set_flag(Negative, this->acc >= 128);
 }
-
 
 void CPU6502::ASL() 
 {
@@ -302,7 +310,7 @@ void CPU6502::BEQ()
 
 void CPU6502::BIT()
 {
-	uint8_t& data = *this->data_address;
+	uint8_t data = *this->data_address;
 	
 	this->set_flag(Overflow, (data & 0x40) >> 6 == 1);
 	this->set_flag(Negative, (data & 0x80) >> 7 == 1);
@@ -340,9 +348,13 @@ void CPU6502::BRK()
 
 	this->pc = ((uint16_t)irq_msb << 8) + (uint16_t)irq_lsb;
 
+	this->set_flag(InterruptDisable, true);
 	this->set_flag(Break, true);
+	this->set_flag(Unused, true);
 
 	this->stack_push(this->status);
+
+	this->set_flag(Break, false);
 }
 
 void CPU6502::BVC()
@@ -359,22 +371,22 @@ void CPU6502::BVS()
 
 void CPU6502::CLC()
 {
-	this->status ^= 0x1;
+	this->set_flag(Carry, false);
 }
 
 void CPU6502::CLD()
 {
-	this->status ^= 0x8;
+	this->set_flag(Decimal, false);
 }
 
 void CPU6502::CLI()
 {
-	this->status ^= 0x4;
+	this->set_flag(InterruptDisable, false);
 }
 
 void CPU6502::CLV()
 {
-	this->status ^= 0x40;
+	this->set_flag(Overflow, false);
 }
 
 void CPU6502::CMP()
@@ -533,7 +545,13 @@ void CPU6502::PHA()
 
 void CPU6502::PHP()
 {
+	this->set_flag(Unused, true);
+	this->set_flag(Break, true);
+
 	this->stack_push(this->status);
+
+	this->set_flag(Unused, false);
+	this->set_flag(Break, false);
 }
 
 void CPU6502::PLA()
@@ -547,6 +565,7 @@ void CPU6502::PLA()
 void CPU6502::PLP()
 {
 	this->status = this->stack_pull();
+	this->set_flag(Unused, true);
 }
 
 void CPU6502::ROL()
@@ -582,6 +601,10 @@ void CPU6502::ROR()
 void CPU6502::RTI()
 {
 	this->status = this->stack_pull();
+	
+	this->set_flag(Unused, false);
+	this->set_flag(Break, false);
+
 	this->pc = (uint16_t)this->stack_pull() + ((uint16_t)this->stack_pull() << 8);
 }
 
@@ -756,8 +779,8 @@ void CPU6502::mod_idr()
 
 void CPU6502::mod_idrx()
 {
-	uint16_t lsb_loc = (this->instr_operand & 0x00FF) + this->x;
-	uint16_t msb_loc = (this->instr_operand & 0x00FF) + (this->x + 1);
+	uint8_t lsb_loc = (this->instr_operand & 0x00FF) + this->x;
+	uint8_t msb_loc = (this->instr_operand & 0x00FF) + (this->x + 1);
 
 	uint8_t least_significant_byte = *(this->bus.read(lsb_loc));
 	uint8_t most_significant_byte = *(this->bus.read(msb_loc));
@@ -768,8 +791,8 @@ void CPU6502::mod_idrx()
 
 void CPU6502::mod_idry()
 {
-	uint16_t lsb_loc = (this->instr_operand & 0x00FF);
-	uint16_t msb_loc = (this->instr_operand & 0x00FF) + 1;
+	uint8_t lsb_loc = (this->instr_operand & 0x00FF);
+	uint8_t msb_loc = (this->instr_operand & 0x00FF) + 1;
 
 	uint8_t least_significant_byte = *(this->bus.read(lsb_loc));
 	uint8_t most_significant_byte = *(this->bus.read(msb_loc));

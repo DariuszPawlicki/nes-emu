@@ -29,6 +29,7 @@ public:
 		InterruptDisable,
 		Decimal,
 		Break,
+		Unused,
 		Overflow,
 		Negative
 	};

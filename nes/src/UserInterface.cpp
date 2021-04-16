@@ -1,7 +1,6 @@
 #include "UserInterface.hpp"
 
 
-
 UserInterface::UserInterface()
 {
     auto height = sf::VideoMode::getDesktopMode().height;
@@ -15,24 +14,24 @@ UserInterface::UserInterface()
 
 UserInterface::~UserInterface(){ delete this->window; }
 
-sf::RenderWindow& UserInterface::get_window(){ return *this->window; }
+std::string UserInterface::get_selected_rom_path(){ return this->selected_rom_path; }
 
-std::string UserInterface::get_rom_path(){ return this->selected_rom_path; }
+bool UserInterface::is_restart_checked() { return this->restart; }
 
-void UserInterface::show_main_menu(CPU6502& cpu, Cartridge& cartridge)
+void UserInterface::show_main_menu(CPU6502& cpu)
 {
-    static bool debug_mode = false;
-    static ImGui::FileBrowser file_browser;
-
-    file_browser.SetTitle("Choose ROM");
-    file_browser.SetTypeFilters({".nes"});
+    this->file_browser.SetTitle("Choose ROM");
+    this->file_browser.SetTypeFilters({".nes"});
 
     if(ImGui::BeginMainMenuBar())
     {
         if(ImGui::BeginMenu("Menu"))
         {
             if(ImGui::MenuItem("Insert Cartridge"))
-                file_browser.Open();
+                this->file_browser.Open();
+
+            if(ImGui::MenuItem("Restart"))
+                this->restart = true;
 
             if(ImGui::MenuItem("Quit"))
                 this->window->close();
@@ -46,27 +45,23 @@ void UserInterface::show_main_menu(CPU6502& cpu, Cartridge& cartridge)
             ImGui::EndMenu();
         }
         
-        file_browser.Display();
+        this->file_browser.Display();
 
-        if(file_browser.HasSelected())
+        if(this->file_browser.HasSelected())
         {
             this->selected_rom_path = file_browser.GetSelected();
-
-            file_browser.ClearSelected();
+            this->file_browser.ClearSelected();
         }
 
-        if(debug_mode)
-            this->show_debugger(cpu, cartridge);
+        if(this->debug_mode)
+            this->show_debugger(cpu);
 
         ImGui::EndMainMenuBar();      
     }     
 }
 
-void UserInterface::show_debugger(CPU6502& cpu, Cartridge& cartridge)
-{
-    static MemoryEditor mem_edit;
-    
-
+void UserInterface::show_debugger(CPU6502& cpu)
+{  
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({23, 19}, ImGuiCond_Once);
 
@@ -103,51 +98,55 @@ void UserInterface::show_debugger(CPU6502& cpu, Cartridge& cartridge)
         ImGui::EndTable();
     }  
 
-    static char breakpoint_str[5];
-    static uint16_t breakpoint;
-
     ImGui::SetCursorPos({353, 250});
     ImGui::PushItemWidth(40);
-    ImGui::InputText(" ", breakpoint_str, IM_ARRAYSIZE(breakpoint_str)); 
+    ImGui::InputText(" ", this->breakpoint_str, IM_ARRAYSIZE(this->breakpoint_str)); 
 
     ImGui::SetCursorPos({403, 250});    
     if(ImGui::Button("Set Breakpoint", {120, 19}))
     {
         std::stringstream break_hex;
 
-        break_hex << std::hex << breakpoint_str;
-        break_hex >> breakpoint;
-        memset(&breakpoint_str, (int)'\0', 4);
+        break_hex << std::hex << this->breakpoint_str;
+        break_hex >> this->breakpoint;
+        memset(&this->breakpoint_str, (int)'\0', 4);
     }
+
+    ImGui::SetCursorPos({353, 200});
+    ImGui::Text("Step: %d", this->step_num);
 
     ImGui::SetCursorPos({353, 220});
-    ImGui::Text("Breakpoint: 0x%X", breakpoint);
-
-    ImGui::SetCursorPos({353, 320});
-    if(ImGui::Button("Run", {100, 30}))
-    {
-        while(cpu.pc != breakpoint)
-            cpu.cycle();
-    }
+    ImGui::Text("Breakpoint: 0x%X", this->breakpoint);
 
     ImGui::SetCursorPos({353, 351});
-    if(ImGui::Button("Step", {100, 30}))
+    if(ImGui::Button("Run To Breakpoint", {125, 30}))
+    {
+        while(cpu.pc != breakpoint)
+        {
+            cpu.cycle();
+            this->step_num++;
+        }           
+    }
+
+    ImGui::SetCursorPos({353, 320});
+    if(ImGui::Button("Step", {125, 30}))
+    {       
         cpu.cycle();
-    
-    static char pc_input[5];
+        this->step_num++;
+    }
 
     ImGui::PushItemWidth(40);
     ImGui::SetCursorPos({270, 25});
-    ImGui::InputText("", pc_input, IM_ARRAYSIZE(pc_input));
+    ImGui::InputText("", this->pc_input, IM_ARRAYSIZE(this->pc_input));
 
     ImGui::SetCursorPos({320, 25});    
     if(ImGui::Button("Set PC", {60, 19}))
     {
         std::stringstream pc_hex;
 
-        pc_hex << std::hex << pc_input;
+        pc_hex << std::hex << this->pc_input;
         pc_hex >> cpu.pc;
-        memset(&pc_input, (int)'\0', 4);
+        memset(&this->pc_input, (int)'\0', 4);
     }
     
     ImGui::SetCursorPos({393, 25});
@@ -228,4 +227,13 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
         }
 
     return disassembled_instructions;
+}
+
+void UserInterface::reset_helpers()
+{
+    memset(&this->breakpoint_str, '\0', 4);
+    memset(&this->pc_input, '\0', 4);
+    this->breakpoint = 0;
+    this->step_num = 1;
+    this->restart = false;
 }
