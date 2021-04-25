@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CPU6502.hpp"
+#include "PPU.hpp"
 #include "Cartridge.hpp"
 #include "UserInterface.hpp"
 
@@ -13,6 +14,7 @@ class NESConsole
 
 	public:	
 		CPU6502 cpu;
+		PPU ppu;
 		Cartridge cartridge;
 		UserInterface ui;
 		std::string selected_rom_path;	

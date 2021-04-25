@@ -10,7 +10,7 @@ void CPU6502::power_up()
 	uint8_t vector_msb = *(this->bus.read(0xFFFD));
 
 	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
-	this->status = 0x34;
+	this->status.set_value(0x34);
 	this->acc = 0;
 	this->x = 0;
 	this->y = 0;
@@ -66,147 +66,15 @@ void CPU6502::cycle()
 		delete this->data_address;
 }
 
-void CPU6502::clear_memory(){ memset(this->bus.memory, 0, 64 * 1024); }
+void CPU6502::clear_memory(){ this->bus.clear_memory(64 * 1024); }
 
 void CPU6502::write_to_memory(uint16_t address, uint8_t data) { this->bus.write(address, data); }
 
 uint8_t* CPU6502::read_from_memory(uint16_t address){ return this->bus.read(address); }
 
-bool CPU6502::extract_flag(CPU6502::Flags flag) 
-{
-	switch (flag) {
-		
-		case Carry:
-			return (this->status & 0x1);
-			break;
+bool CPU6502::extract_flag(CPU6502::Flags flag) { return this->status.get_bit(flag); }
 
-		case Zero:
-			return (this->status & 0x2) >> 1;
-			break;
-
-		case InterruptDisable:
-			return (this->status & 0x4) >> 2;
-			break;
-
-		case Decimal:
-			return (this->status & 0x8) >> 3;
-			break;
-
-		case Break:
-			return (this->status & 0x10) >> 4;
-			break;
-		
-		case Unused:
-			return (this->status & 0x20) >> 5;
-			break;
-
-		case Overflow:
-			return (this->status & 0x40) >> 6;
-			break;
-
-		case Negative:
-			return (this->status & 0x80) >> 7;
-			break;
-		
-		default:
-			return NULL;
-			break;
-	}
-}
-
-void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value) 
-{
-	switch (flag) {
-
-		case Carry:
-			if (flag_value)
-			{
-				this->status |= 0x1;
-			}
-			else 
-			{
-				this->status &= ~0x1;
-			}
-			break;
-
-		case Zero:
-			if (flag_value)
-			{
-				this->status |= 0x2;
-			}
-			else
-			{
-				this->status &= ~0x2;
-			}
-			break;
-
-		case InterruptDisable:
-			if (flag_value)
-			{
-				this->status |= 0x4;
-			}
-			else
-			{
-				this->status &= ~0x4;
-			}
-			break;
-
-		case Decimal:
-			if (flag_value)
-			{
-				this->status |= 0x8;
-			}
-			else
-			{
-				this->status &= ~0x8;
-			}
-			break;
-
-		case Break:
-			if (flag_value)
-			{
-				this->status |= 0x10;
-			}
-			else
-			{
-				this->status &= ~0x10;
-			}
-			break;
-		
-		case Unused:
-			if (flag_value)
-			{
-				this->status |= 0x20;
-			}
-			else
-			{
-				this->status &= ~0x20;
-			}
-			break;
-
-		case Overflow:
-			if (flag_value)
-			{
-				this->status |= 0x40;
-			}
-			else
-			{
-				this->status &= ~0x40;
-			}
-			break;
-
-		case Negative:
-			if (flag_value)
-			{
-				this->status |= 0x80;
-			}
-			else
-			{
-				this->status &= ~0x80;
-			}
-			break;
-	}
-}
+void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value) { this->status.set_bit(flag, flag_value); }
 
 void CPU6502::stack_push(uint8_t data) 
 {
@@ -297,9 +165,8 @@ void CPU6502::BCC()
 
 void CPU6502::BCS()
 {
-	if (this->extract_flag(Carry) == true) {
+	if (this->extract_flag(Carry) == true)
 		this->pc = this->instr_operand;
-	}
 }
 
 void CPU6502::BEQ()
@@ -312,8 +179,8 @@ void CPU6502::BIT()
 {
 	uint8_t data = *this->data_address;
 	
-	this->set_flag(Overflow, (data & 0x40) >> 6 == 1);
-	this->set_flag(Negative, (data & 0x80) >> 7 == 1);
+	this->set_flag(Overflow, ((data & 0x40) >> 6) == 1);
+	this->set_flag(Negative, ((data & 0x80) >> 7) == 1);
 
 	data &= this->acc;
 
@@ -352,7 +219,7 @@ void CPU6502::BRK()
 	this->set_flag(Break, true);
 	this->set_flag(Unused, true);
 
-	this->stack_push(this->status);
+	this->stack_push(this->status.get_value());
 
 	this->set_flag(Break, false);
 }
@@ -548,7 +415,7 @@ void CPU6502::PHP()
 	this->set_flag(Unused, true);
 	this->set_flag(Break, true);
 
-	this->stack_push(this->status);
+	this->stack_push(this->status.get_value());
 
 	this->set_flag(Unused, false);
 	this->set_flag(Break, false);
@@ -564,7 +431,7 @@ void CPU6502::PLA()
 
 void CPU6502::PLP()
 {
-	this->status = this->stack_pull();
+	this->status.set_value(this->stack_pull());
 	this->set_flag(Unused, true);
 }
 
@@ -572,9 +439,8 @@ void CPU6502::ROL()
 {
 	bool carry = this->extract_flag(Carry);
 
-	this->status &= ~0x1;
-
-	this->status |= (*this->data_address & 0x80) >> 7;
+	this->status.set_value(this->status.get_value() & ~0x1);
+	this->status.set_value(this->status.get_value() | (*this->data_address & 0x80) >> 7);
 
 	*this->data_address <<= 1;
 	*this->data_address += carry;
@@ -587,9 +453,8 @@ void CPU6502::ROR()
 {
 	bool carry = this->extract_flag(Carry);
 
-	this->status &= ~0x1;
-
-	this->status |= (*this->data_address & 0x1);
+	this->status.set_value(this->status.get_value() & ~0x1);
+	this->status.set_value(this->status.get_value() | (*this->data_address & 0x1));
 
 	*this->data_address >>= 1;
 	*this->data_address |= carry << 7;
@@ -600,7 +465,7 @@ void CPU6502::ROR()
 
 void CPU6502::RTI()
 {
-	this->status = this->stack_pull();
+	this->status.set_value(this->stack_pull());
 	
 	this->set_flag(Unused, false);
 	this->set_flag(Break, false);
@@ -708,6 +573,16 @@ void CPU6502::TYA()
 	this->set_flag(Negative, this->y >= 128);
 }
 
+void CPU6502::UNK()
+{
+	return;
+}
+
+void CPU6502::LAX()
+{
+	
+}
+
 void CPU6502::mod_abs()
 {
 	uint16_t target_address = this->instr_operand;
@@ -726,18 +601,14 @@ void CPU6502::mod_zp()
 }
 
 void CPU6502::mod_zpx()
-{
-	/*Casting to uint8_t implements address wraping.
-      If operand is 0xff and X is 0x01 then uint16_t would be 0x100
-      with casting it wraps to 0x00 */
-	  
-	uint16_t target_address = (uint8_t)((this->instr_operand & 0x00FF) + this->x);
+{	  
+	uint8_t target_address = this->instr_operand + this->x;
 	this->data_address = this->bus.read(target_address);
 }
 
 void CPU6502::mod_zpy()
 {
-	uint16_t target_address = (uint8_t)((this->instr_operand & 0x00FF) + this->y);
+	uint8_t target_address = this->instr_operand + this->y;
 	this->data_address = this->bus.read(target_address);
 }
 
@@ -760,7 +631,8 @@ void CPU6502::mod_imd()
 
 void CPU6502::mod_rel()
 {
-	this->instr_operand += this->pc;
+	int8_t signed_operand = this->instr_operand;
+	this->instr_operand = signed_operand + this->pc;
 }
 
 void CPU6502::mod_imp()
@@ -771,7 +643,17 @@ void CPU6502::mod_imp()
 void CPU6502::mod_idr()
 {
 	uint8_t least_significant_byte = *(this->bus.read(this->instr_operand));
-	uint8_t most_significant_byte = *(this->bus.read(this->instr_operand + 1));
+	uint8_t most_significant_byte;
+
+	/* Implementation of hardware bug. If least significant byte is 0xFF,
+	   then page is not crossed when reading most significant byte, instead
+	   address is wrapped, so if operand is $02FF, then lsb is read from
+	   $02FF and msb is read from $0200 instead of $0300. */
+
+	if((this->instr_operand & 0x00FF) == 0x00FF)		
+		most_significant_byte = *(this->bus.read(this->instr_operand & 0xFF00));
+	else
+		most_significant_byte = *(this->bus.read(this->instr_operand + 1));
 
 	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
 	this->instr_operand = target_address;
@@ -779,8 +661,8 @@ void CPU6502::mod_idr()
 
 void CPU6502::mod_idrx()
 {
-	uint8_t lsb_loc = (this->instr_operand & 0x00FF) + this->x;
-	uint8_t msb_loc = (this->instr_operand & 0x00FF) + (this->x + 1);
+	uint8_t lsb_loc = this->instr_operand + this->x;
+	uint8_t msb_loc = this->instr_operand + this->x + 1;
 
 	uint8_t least_significant_byte = *(this->bus.read(lsb_loc));
 	uint8_t most_significant_byte = *(this->bus.read(msb_loc));

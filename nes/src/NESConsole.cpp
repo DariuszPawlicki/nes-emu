@@ -14,14 +14,13 @@ void NESConsole::prg_rom_to_ram()
 	uint8_t* prg_rom_buffer = new uint8_t[prg_size];
 
 	this->cartridge.rom->read((char*)prg_rom_buffer, prg_size);
-
 	this->cpu.clear_memory(); // Cleaning memory in case different cartridge was loaded earlier
 
 	for (int i = 0; i < prg_size; i++) 
 		this->cpu.write_to_memory(this->cpu.PRG_ROM_BEGINNING + i, prg_rom_buffer[i]);
 	
 	/* If cartridge contains only one 16 kB memory block, then
-	   it's mirrored - duplicated */
+	   it's duplicated */
 
 	if(this->cartridge.header.prg_rom_size == 1)
 	{
@@ -34,7 +33,17 @@ void NESConsole::prg_rom_to_ram()
 
 void NESConsole::chr_rom_to_ram() 
 {
+	int chr_size = this->cartridge.header.chr_rom_size * 8192;
 
+	uint8_t* chr_rom_buffer = new uint8_t[chr_size];
+
+	this->cartridge.rom->read((char*)chr_rom_buffer, chr_size);
+	this->ppu.clear_memory();
+
+	for(int i = 0; i < chr_size; i++)
+		this->ppu.write_to_memory(i, chr_rom_buffer[i]);
+	
+	delete[] chr_rom_buffer;
 }
 
 bool NESConsole::is_rom_changed()
@@ -55,10 +64,11 @@ void NESConsole::insert_cartridge_and_power_up(std::string rom_path)
 	if(this->cartridge.load_rom(rom_path))
 	{
 		this->prg_rom_to_ram();
+		this->chr_rom_to_ram();
 		this->cpu.power_up();
 	}
 }
 
 void NESConsole::cpu_cycle(){ this->cpu.cycle(); }
 
-void NESConsole::show_main_menu() { this->ui.show_main_menu(this->cpu); }
+void NESConsole::show_main_menu() { this->ui.show_main_menu(this->cpu, this->ppu); }

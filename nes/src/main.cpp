@@ -1,7 +1,7 @@
 #include "NESConsole.hpp"
 #include <iostream>
 
-// D16E
+
 
 int main()
 {

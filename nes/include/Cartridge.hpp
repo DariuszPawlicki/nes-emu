@@ -25,6 +25,8 @@ class Cartridge
 		uint8_t mapper_id;
 		std::ifstream* rom = nullptr;
 
-		bool load_rom(std::string rom_path);				
+		bool load_rom(std::string rom_path);
+	
+	private:				
 		void extract_header_info();
 };
