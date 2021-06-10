@@ -12,4 +12,8 @@ For building process You will need:
 - OpenGL
 - C++17
 
-Ultimately building process will be automated with CMake.
+## Features (implemented):
+
+- Graphical Debugger
+
+![](gifs/debugger.gif)
