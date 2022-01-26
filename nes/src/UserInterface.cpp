@@ -170,7 +170,7 @@ void UserInterface::show_ppu_debugger(PPU& ppu)
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({300, 110}, ImGuiCond_Once);
 
-    this->ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.memory, 16 * 1024);
+    this->ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
 }
 
 std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)

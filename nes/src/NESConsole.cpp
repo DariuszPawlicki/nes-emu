@@ -41,7 +41,7 @@ void NESConsole::chr_rom_to_ram()
 	this->ppu.clear_memory();
 
 	for(int i = 0; i < chr_size; i++)
-		this->ppu.write_to_memory(i, chr_rom_buffer[i]);
+		this->ppu.ppu_write(i, chr_rom_buffer[i]);
 	
 	delete[] chr_rom_buffer;
 }
