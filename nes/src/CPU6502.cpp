@@ -1,13 +1,17 @@
 #include "CPU6502.hpp"
+#include "CpuBus.hpp"
+
 #include <iostream>
 
+
+void CPU6502::connect_bus(CpuBus* cpu_bus){ this->cpu_bus = cpu_bus; }
 
 
 void CPU6502::power_up()
 {
-	uint8_t vector_lsb = *(this->cpu_bus.read(0xFFFC)); // Setting program counter to address
+	uint8_t vector_lsb = *(this->cpu_bus->read(0xFFFC)); // Setting program counter to address
 												   	   //  stored in reset vector
-	uint8_t vector_msb = *(this->cpu_bus.read(0xFFFD));
+	uint8_t vector_msb = *(this->cpu_bus->read(0xFFFD));
 
 	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
 	this->status.set_value(0x34);
@@ -15,14 +19,14 @@ void CPU6502::power_up()
 	this->x = 0;
 	this->y = 0;
 	this->sp = 0xFD;
-	this->cpu_bus.write(0x4015, 0);
-	this->cpu_bus.write(0x4017, 0);
+	this->cpu_bus->write(0x4015, 0);
+	this->cpu_bus->write(0x4017, 0);
 
 	for(int i = 0; i <= 16; i++)
-		this->cpu_bus.write(0x4000 + i, 0);
+		this->cpu_bus->write(0x4000 + i, 0);
 	
 	for(int i = 0; i <= 3; i++)
-		this->cpu_bus.write(0x4010 + i, 0);
+		this->cpu_bus->write(0x4010 + i, 0);
 }
 
 
@@ -30,7 +34,7 @@ void CPU6502::cycle()
 { 
 	// Fetch
 	
-	uint8_t instr_opcode = *(this->cpu_bus.read(this->pc)); 
+	uint8_t instr_opcode = *(this->cpu_bus->read(this->pc)); 
 	
 	// Decode
 
@@ -42,14 +46,14 @@ void CPU6502::cycle()
 
 	if(operand_bytes == 1)
 	{
-		this->instr_operand = *(this->cpu_bus.read(this->pc));
+		this->instr_operand = *(this->cpu_bus->read(this->pc));
 		this->pc++;
 	}
 	else if(operand_bytes == 2)
 	{
-		this->instr_operand = *(this->cpu_bus.read(this->pc));
+		this->instr_operand = *(this->cpu_bus->read(this->pc));
 		this->pc++;
-		this->instr_operand += *(this->cpu_bus.read(this->pc)) << 8;
+		this->instr_operand += *(this->cpu_bus->read(this->pc)) << 8;
 		this->pc++;
 	}
 
@@ -66,11 +70,11 @@ void CPU6502::cycle()
 		delete this->data_address;
 }
 
-void CPU6502::clear_memory(){ this->cpu_bus.clear_memory(64 * 1024); }
+void CPU6502::clear_memory(){ this->cpu_bus->clear_memory(64 * 1024); }
 
-void CPU6502::write_to_memory(uint16_t address, uint8_t data) { this->cpu_bus.write(address, data); }
+void CPU6502::write_to_memory(uint16_t address, uint8_t data) { this->cpu_bus->write(address, data); }
 
-uint8_t* CPU6502::read_from_memory(uint16_t address){ return this->cpu_bus.read(address); }
+uint8_t* CPU6502::read_from_memory(uint16_t address){ return this->cpu_bus->read(address); }
 
 bool CPU6502::extract_flag(CPU6502::Flags flag) { return this->status.get_bit(flag); }
 
@@ -78,13 +82,13 @@ void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value) { this->status.set_
 
 void CPU6502::stack_push(uint8_t data) 
 {
-	this->cpu_bus.write(STACK_BEGINNING + this->sp, data);
+	this->cpu_bus->write(STACK_BEGINNING + this->sp, data);
 	this->sp--;
 }
 
 uint8_t CPU6502::stack_pull() 
 {
-	uint8_t data = *(this->cpu_bus.read(STACK_BEGINNING + (++this->sp)));
+	uint8_t data = *(this->cpu_bus->read(STACK_BEGINNING + (++this->sp)));
 	return data;
 }
 
@@ -92,8 +96,8 @@ void CPU6502::reset()
 {
 	if(this->extract_flag(InterruptDisable) == false)
 	{
-		uint8_t vector_lsb = *(this->cpu_bus.read(0xFFFC));
-		uint8_t vector_msb = *(this->cpu_bus.read(0xFFFD));
+		uint8_t vector_lsb = *(this->cpu_bus->read(0xFFFC));
+		uint8_t vector_msb = *(this->cpu_bus->read(0xFFFD));
 
 		this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
 		this->set_flag(InterruptDisable, true);
@@ -105,8 +109,8 @@ void CPU6502::irq()
 {
 	if(this->extract_flag(InterruptDisable) == false)
 	{
-		uint8_t vector_lsb = *(this->cpu_bus.read(0xFFFE));
-		uint8_t vector_msb = *(this->cpu_bus.read(0xFFFF));
+		uint8_t vector_lsb = *(this->cpu_bus->read(0xFFFE));
+		uint8_t vector_msb = *(this->cpu_bus->read(0xFFFF));
 
 		this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
 	}
@@ -114,8 +118,8 @@ void CPU6502::irq()
 
 void CPU6502::nmi()
 {
-	uint8_t vector_lsb = *(this->cpu_bus.read(0xFFFA));
-	uint8_t vector_msb = *(this->cpu_bus.read(0xFFFB));
+	uint8_t vector_lsb = *(this->cpu_bus->read(0xFFFA));
+	uint8_t vector_msb = *(this->cpu_bus->read(0xFFFB));
 
 	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
 }
@@ -210,8 +214,8 @@ void CPU6502::BRK()
 	this->stack_push((this->pc >> 8) & 0x00FF);
 	this->stack_push(this->pc & 0x00FF);
 
-	uint8_t irq_lsb = *(this->cpu_bus.read(0xFFFE));
-	uint8_t irq_msb = *(this->cpu_bus.read(0xFFFF));
+	uint8_t irq_lsb = *(this->cpu_bus->read(0xFFFE));
+	uint8_t irq_msb = *(this->cpu_bus->read(0xFFFF));
 
 	this->pc = ((uint16_t)irq_msb << 8) + (uint16_t)irq_lsb;
 
@@ -586,7 +590,7 @@ void CPU6502::LAX()
 void CPU6502::mod_abs()
 {
 	uint16_t target_address = this->instr_operand;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_acc()
@@ -597,31 +601,31 @@ void CPU6502::mod_acc()
 void CPU6502::mod_zp()
 {
 	uint16_t target_address = (this->instr_operand & 0x00FF);
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_zpx()
 {	  
 	uint8_t target_address = this->instr_operand + this->x;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_zpy()
 {
 	uint8_t target_address = this->instr_operand + this->y;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_absx()
 {
 	uint16_t target_address = this->instr_operand + this->x;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_absy()
 {
 	uint16_t target_address = this->instr_operand + this->y;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_imd() 
@@ -642,7 +646,7 @@ void CPU6502::mod_imp()
 
 void CPU6502::mod_idr()
 {
-	uint8_t least_significant_byte = *(this->cpu_bus.read(this->instr_operand));
+	uint8_t least_significant_byte = *(this->cpu_bus->read(this->instr_operand));
 	uint8_t most_significant_byte;
 
 	/* Implementation of hardware bug. If least significant byte is 0xFF,
@@ -651,9 +655,9 @@ void CPU6502::mod_idr()
 	   $02FF and msb is read from $0200 instead of $0300. */
 
 	if((this->instr_operand & 0x00FF) == 0x00FF)		
-		most_significant_byte = *(this->cpu_bus.read(this->instr_operand & 0xFF00));
+		most_significant_byte = *(this->cpu_bus->read(this->instr_operand & 0xFF00));
 	else
-		most_significant_byte = *(this->cpu_bus.read(this->instr_operand + 1));
+		most_significant_byte = *(this->cpu_bus->read(this->instr_operand + 1));
 
 	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
 	this->instr_operand = target_address;
@@ -664,11 +668,11 @@ void CPU6502::mod_idrx()
 	uint8_t lsb_loc = this->instr_operand + this->x;
 	uint8_t msb_loc = this->instr_operand + this->x + 1;
 
-	uint8_t least_significant_byte = *(this->cpu_bus.read(lsb_loc));
-	uint8_t most_significant_byte = *(this->cpu_bus.read(msb_loc));
+	uint8_t least_significant_byte = *(this->cpu_bus->read(lsb_loc));
+	uint8_t most_significant_byte = *(this->cpu_bus->read(msb_loc));
 
 	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }
 
 void CPU6502::mod_idry()
@@ -676,9 +680,9 @@ void CPU6502::mod_idry()
 	uint8_t lsb_loc = (this->instr_operand & 0x00FF);
 	uint8_t msb_loc = (this->instr_operand & 0x00FF) + 1;
 
-	uint8_t least_significant_byte = *(this->cpu_bus.read(lsb_loc));
-	uint8_t most_significant_byte = *(this->cpu_bus.read(msb_loc));
+	uint8_t least_significant_byte = *(this->cpu_bus->read(lsb_loc));
+	uint8_t most_significant_byte = *(this->cpu_bus->read(msb_loc));
 
 	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte + this->y;
-	this->data_address = this->cpu_bus.read(target_address);
+	this->data_address = this->cpu_bus->read(target_address);
 }

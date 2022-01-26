@@ -1,5 +1,9 @@
 #pragma once
 
+#include "CPU6502.hpp"
+#include "PPU.hpp"
+#include "Cartridge.hpp"
+
 #include <cstdint>
 #include <cstring>
 
@@ -7,6 +11,11 @@ class CpuBus
 {
 	public:
 		uint8_t* memory;
+	
+	private:
+		CPU6502 cpu;
+		PPU ppu;
+		Cartridge cartridge;
 	
 	public:
 		CpuBus(size_t size);

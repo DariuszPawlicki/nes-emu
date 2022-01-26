@@ -1,12 +1,15 @@
 #pragma once
 
+#include "Byte.hpp"
+
 #include <cstdint>
 #include <cstring>
 #include <string>
 #include <unordered_map>
 #include <fstream>
-#include "CpuBus.hpp"
-#include "Byte.hpp"
+
+
+class CpuBus; // Preventing circular imports
 
 
 class CPU6502
@@ -65,7 +68,7 @@ public:
 		{ "ZPY", 1 }, { "???", 0 },
 	};
 
-	CpuBus cpu_bus = CpuBus(64 * 1024);
+	CpuBus* cpu_bus = nullptr;
 
 	uint16_t instr_operand{ 0 };
 	uint8_t* data_address{ 0 };  // Pointer to data extracted by addressing mode
@@ -124,6 +127,7 @@ public:
 
 public:
 
+	void connect_bus(CpuBus* cpu_bus);
 	void power_up();
 	void cycle();
 	void clear_memory();
