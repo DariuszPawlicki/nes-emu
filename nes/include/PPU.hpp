@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Bus.hpp"
+#include "CpuBus.hpp"
 #include "Byte.hpp"
 
 class PPU
 { 
     public:
-        Bus bus = Bus(16 * 1024);
+        CpuBus bus = CpuBus(16 * 1024);
 
         // Registers
         

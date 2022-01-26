@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <fstream>
-#include "Bus.hpp"
+#include "CpuBus.hpp"
 #include "Byte.hpp"
 
 
@@ -65,7 +65,7 @@ public:
 		{ "ZPY", 1 }, { "???", 0 },
 	};
 
-	Bus bus = Bus(64 * 1024);
+	CpuBus cpu_bus = CpuBus(64 * 1024);
 
 	uint16_t instr_operand{ 0 };
 	uint8_t* data_address{ 0 };  // Pointer to data extracted by addressing mode
@@ -123,6 +123,7 @@ public:
 	};
 
 public:
+
 	void power_up();
 	void cycle();
 	void clear_memory();

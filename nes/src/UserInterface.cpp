@@ -162,7 +162,7 @@ void UserInterface::show_cpu_debugger(CPU6502& cpu)
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({652, 19}, ImGuiCond_Once);
 
-    this->cpu_mem_edit.DrawWindow("CPU Memory", cpu.bus.memory, 64 * 1024); 
+    this->cpu_mem_edit.DrawWindow("CPU Memory", cpu.cpu_bus.memory, 64 * 1024); 
 }
 
 void UserInterface::show_ppu_debugger(PPU& ppu)
