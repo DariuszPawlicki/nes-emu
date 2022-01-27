@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CpuBus.hpp"
 #include "Byte.hpp"
 
 class PPU
@@ -25,7 +24,7 @@ class PPU
     public:
         // Accessing devices connected to PPU bus
         void ppu_write(uint16_t address, uint8_t data);
-        uint8_t* ppu_read(uint16_t address);
+        uint8_t ppu_read(uint16_t address);
 
         // Accessing memory mapped PPU registers, connected to CPU bus
         void cpu_write(uint16_t address, uint8_t data);

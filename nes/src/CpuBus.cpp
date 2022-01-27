@@ -34,4 +34,6 @@ uint8_t CpuBus::read(uint16_t address)
 
 void CpuBus::write(uint16_t address, uint8_t data) { this->cpu_ram[address] = data; }
 
+void CpuBus::insert_cartridge(const std::shared_ptr<Cartridge>& cartridge) { this->cartridge = cartridge; }
+
 void CpuBus::clear_memory(){  }

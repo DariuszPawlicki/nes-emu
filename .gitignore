@@ -340,7 +340,8 @@ ASALocalRun/
 healthchecksdb
 
 # Other
-.vscode
 /bin
 imgui.ini
 imgui_demo.cpp
+
+errors.txt

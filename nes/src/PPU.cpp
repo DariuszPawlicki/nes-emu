@@ -15,10 +15,15 @@ void PPU::ppu_write(uint16_t address, uint8_t data)
     }
 }
 
-uint8_t* PPU::ppu_read(uint16_t address)
+uint8_t PPU::ppu_read(uint16_t address)
 { 
     address &= 0x3FFF;
-    
+
+    uint8_t data;
+
+
+
+    return data;
 }
 
 void PPU::cpu_write(uint16_t address, uint8_t data)
@@ -26,4 +31,9 @@ void PPU::cpu_write(uint16_t address, uint8_t data)
     address &= 0x0007;
 
 
+}
+
+Byte PPU::cpu_read(uint16_t address)
+{
+    
 }
