@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mapper.hpp"
 
 #include <string>
 #include <fstream>
@@ -9,7 +10,8 @@
 
 class Cartridge
 {
-	struct Header {
+	struct Header 
+	{
 		uint8_t nes_const[4];
 		uint8_t prg_rom_size;
 		uint8_t chr_rom_size;
@@ -21,7 +23,12 @@ class Cartridge
 		uint8_t padding[5];
 	};
 
-	public:		
+	private:
+		std::vector<uint8_t> prg_rom;
+		std::vector<uint8_t> chr_rom;
+
+	public:	
+		Mapper mapper;	
 		Header header; // 16 bytes
 		uint8_t mapper_id;
 		bool rom_opened_correctly; // Flag for rendering window with error msg
@@ -34,8 +41,4 @@ class Cartridge
 
 		uint8_t ppu_read(uint16_t address);
 		void ppu_write(uint16_t address, uint8_t data);
-	
-	private:
-		std::vector<uint8_t> prg_rom;
-		std::vector<uint8_t> chr_rom;
 };

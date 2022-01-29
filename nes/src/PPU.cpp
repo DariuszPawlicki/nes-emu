@@ -35,5 +35,7 @@ void PPU::cpu_write(uint16_t address, uint8_t data)
 
 Byte PPU::cpu_read(uint16_t address)
 {
-    
+    Byte data;
+
+    return data;
 }

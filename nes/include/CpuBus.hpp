@@ -10,12 +10,13 @@
 #include <memory>
 #include <array>
 
+
 class CpuBus
 {
-	public:
+	private:
 		std::array<uint8_t, 2048> cpu_ram;
 	
-	private:
+	public:
 		CPU6502 cpu;
 		PPU ppu;
 		std::shared_ptr<Cartridge> cartridge;

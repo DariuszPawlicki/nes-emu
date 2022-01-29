@@ -12,10 +12,7 @@ class NESConsole
 		UserInterface ui;
 		std::string selected_rom_path;	
 
-	public:
-		NESConsole();
-		~NESConsole();
-		
+	public:	
 		void insert_cartridge_and_power_up(std::string rom_path);
 		void show_main_menu();
 		bool is_rom_changed();

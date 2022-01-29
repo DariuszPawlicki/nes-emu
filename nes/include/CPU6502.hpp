@@ -131,8 +131,8 @@ public:
 	void power_up();
 	void cycle();
 	void clear_memory();
-	void write_to_memory(uint16_t address, uint8_t data);
-	uint8_t read_from_memory(uint16_t address);
+	void write(uint16_t address, uint8_t data);
+	uint8_t read(uint16_t address);
 	
 	bool extract_flag(Flags flag);
 	void set_flag(Flags flag, bool flag_value);

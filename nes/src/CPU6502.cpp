@@ -10,7 +10,7 @@ void CPU6502::connect_bus(CpuBus* cpu_bus){ this->cpu_bus = cpu_bus; }
 void CPU6502::power_up()
 {
 	uint8_t vector_lsb = this->cpu_bus->read(0xFFFC); // Setting program counter to address
-												   	   //  stored in reset vector
+												   	 //  stored in reset vector
 	uint8_t vector_msb = this->cpu_bus->read(0xFFFD);
 
 	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
@@ -65,9 +65,9 @@ void CPU6502::cycle()
 
 void CPU6502::clear_memory(){  }
 
-void CPU6502::write_to_memory(uint16_t address, uint8_t data) { this->cpu_bus->write(address, data); }
+void CPU6502::write(uint16_t address, uint8_t data) { this->cpu_bus->write(address, data); }
 
-uint8_t CPU6502::read_from_memory(uint16_t address){ return this->cpu_bus->read(address); }
+uint8_t CPU6502::read(uint16_t address){ return this->cpu_bus->read(address); }
 
 bool CPU6502::extract_flag(CPU6502::Flags flag) { return this->status.get_bit(flag); }
 

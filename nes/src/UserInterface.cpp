@@ -20,7 +20,7 @@ std::string UserInterface::get_selected_rom_path(){ return this->selected_rom_pa
 
 bool UserInterface::is_restart_checked() { return this->restart; }
 
-void UserInterface::show_main_menu(CPU6502& cpu, PPU& ppu)
+void UserInterface::show_main_menu(CpuBus& cpu_bus)
 {
     this->file_browser.SetTitle("Choose ROM");
     this->file_browser.SetTypeFilters({".nes"});
@@ -57,16 +57,18 @@ void UserInterface::show_main_menu(CPU6502& cpu, PPU& ppu)
 
         if(this->debug_mode)
         {
-            this->show_cpu_debugger(cpu);
-            this->show_ppu_debugger(ppu);
+            this->show_cpu_debugger(cpu_bus);
+            //this->show_ppu_debugger(ppu);
         }
             
         ImGui::EndMainMenuBar();      
     }     
 }
 
-void UserInterface::show_cpu_debugger(CPU6502& cpu)
+void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
 {  
+    CPU6502& cpu = cpu_bus.cpu;
+
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({23, 19}, ImGuiCond_Once);
 
@@ -162,7 +164,10 @@ void UserInterface::show_cpu_debugger(CPU6502& cpu)
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({652, 19}, ImGuiCond_Once);
 
-    this->cpu_mem_edit.DrawWindow("CPU Memory", cpu.cpu_bus.memory, 64 * 1024); 
+    for (int i = 0; i <= 0xFFFF; i++)
+        this->cpu_mem_layout[i] = cpu_bus.read(i);
+
+    this->cpu_mem_edit.DrawWindow("CPU Memory", &this->cpu_mem_layout, 64 * 1024); 
 }
 
 void UserInterface::show_ppu_debugger(PPU& ppu)
@@ -170,7 +175,7 @@ void UserInterface::show_ppu_debugger(PPU& ppu)
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({300, 110}, ImGuiCond_Once);
 
-    this->ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
+    //this->ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
 }
 
 std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
@@ -183,7 +188,7 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
     {
         std::stringstream dis_instruction;
 
-        uint8_t op_code = *cpu.read_from_memory(tmp_pc);
+        uint8_t op_code = cpu.read(tmp_pc);
         CPU6502::Instruction instruction = cpu.op_map[op_code];
 
         std::string addressing_name = instruction.op_name.substr(4, instruction.op_name.length());
@@ -198,7 +203,7 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
 
         for(int j = 1; j <= operand_bytes; j++)
         {
-            operands.push_back(*cpu.read_from_memory(tmp_pc + j));
+            operands.push_back(cpu.read(tmp_pc + j));
 
             dis_instruction << std::hex << std::uppercase << std::setfill('0');   // Print operands padded with 0
                                                                                     //  to length 2 e.g. operand 9 = 09

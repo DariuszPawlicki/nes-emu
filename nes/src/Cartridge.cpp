@@ -1,5 +1,6 @@
 #include "Cartridge.hpp"
-
+#include <iostream>
+#include <iomanip>
 
 
 Cartridge::Cartridge(const std::string& rom_path)
@@ -10,6 +11,8 @@ Cartridge::Cartridge(const std::string& rom_path)
 
 	if(rom.is_open())
 	{
+		this->rom_opened_correctly = true;
+
 		uint8_t* header_data = new uint8_t[16];
 
 		rom.seekg(0);
@@ -44,7 +47,27 @@ Cartridge::Cartridge(const std::string& rom_path)
 		
 		rom.read((char*)this->prg_rom.data(), this->prg_rom.size());
 		rom.read((char*)this->chr_rom.data(), this->chr_rom.size());
+
+		rom.close();
+
+		if(this->header.prg_rom_size == 1) // If PRG ROM block count is 1 then, this block is duplicated
+			this->prg_rom.insert(this->prg_rom.end(), this->prg_rom.begin(), this->prg_rom.end());
 	}
 	else
 		this->rom_opened_correctly = false;
+}
+
+uint8_t Cartridge::cpu_read(uint16_t address)
+{
+	/* 
+	   If PRG ROM blocks count is 1, then
+	   PRG ROM block is duplicated, so
+	   vector takes 32kB of space - 0x0000 -> 0x7FFF
+	   Addresses given as arguments are in range - 0x4020 -> 0xFFFF
+	   so there is a need to map them into vector addressable space
+	*/
+	if(this->header.prg_rom_size == 1)
+		address &= 0x7FFF;
+
+	return this->prg_rom[address];
 }

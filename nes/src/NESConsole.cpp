@@ -3,7 +3,7 @@
 
 void NESConsole::insert_cartridge_and_power_up(std::string rom_path) 
 {
-	std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
+	std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>(rom_path);
 
 	this->cpu_bus.insert_cartridge(cartridge);
 	this->cpu_bus.power_up();

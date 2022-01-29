@@ -2,12 +2,15 @@
 
 #include "Byte.hpp"
 
+#include <array>
+
+
 class PPU
 { 
     private:
-        uint8_t pattern_table[8 * 1024];
-        uint8_t name_table[4 * 1024];
-        uint8_t palette[32];
+        std::array<uint8_t, 8 * 1024> pattern_table;
+        std::array<uint8_t, 4 * 1024> name_table;
+        std::array<uint8_t, 32> palette;
 
     public:
         Byte ppu_ctrl;
@@ -22,7 +25,7 @@ class PPU
         Byte oam_dma;
     
     public:
-        // Accessing devices connected to PPU bus
+        // Accessing PPU bus
         void ppu_write(uint16_t address, uint8_t data);
         uint8_t ppu_read(uint16_t address);
 
