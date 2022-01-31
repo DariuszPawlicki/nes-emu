@@ -71,6 +71,7 @@ public:
 	CpuBus* cpu_bus = nullptr;
 
 	uint16_t instr_operand{ 0 };
+	uint16_t target_address{ 0 };
 	uint8_t data_extracted{ 0 };  // Data extracted by addressing mode
 
 	// Registers

@@ -39,6 +39,10 @@ void CpuBus::write(uint16_t address, uint8_t data) // TODO
     this->cpu_ram[address] = data; 
 }
 
-void CpuBus::insert_cartridge(const std::shared_ptr<Cartridge>& cartridge) { this->cartridge = cartridge; }
+void CpuBus::insert_cartridge(const std::shared_ptr<Cartridge>& cartridge) 
+{ 
+    for(uint8_t& item : this->cpu_ram)
+        item = 0;
 
-void CpuBus::clear_memory(){  }
+    this->cartridge = cartridge; 
+}

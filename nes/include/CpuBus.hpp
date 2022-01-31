@@ -29,6 +29,4 @@ class CpuBus
 
 		void insert_cartridge(const std::shared_ptr<Cartridge>& cartridge);
 		void power_up();
-
-		void clear_memory();
 };

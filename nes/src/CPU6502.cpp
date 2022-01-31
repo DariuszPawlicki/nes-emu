@@ -61,6 +61,13 @@ void CPU6502::cycle()
 
 	(this->*(cur_instruction.adr_mod))();	
 	(this->*(cur_instruction.operation))();
+
+	if(cur_instruction.adr_mod == &CPU6502::mod_acc)
+		this->acc = this->data_extracted;
+	else if(cur_instruction.adr_mod != &CPU6502::mod_imd && 
+		    cur_instruction.adr_mod != &CPU6502::mod_imp &&
+			cur_instruction.adr_mod != &CPU6502::mod_rel)
+		this->cpu_bus->write(this->target_address, this->data_extracted);
 }
 
 void CPU6502::clear_memory(){  }
@@ -582,8 +589,8 @@ void CPU6502::LAX()
 
 void CPU6502::mod_abs()
 {
-	uint16_t target_address = this->instr_operand;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = this->instr_operand;
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_acc()
@@ -593,32 +600,32 @@ void CPU6502::mod_acc()
 
 void CPU6502::mod_zp()
 {
-	uint16_t target_address = (this->instr_operand & 0x00FF);
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = (this->instr_operand & 0x00FF);
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_zpx()
 {	  
 	uint8_t target_address = this->instr_operand + this->x;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_zpy()
 {
 	uint8_t target_address = this->instr_operand + this->y;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_absx()
 {
-	uint16_t target_address = this->instr_operand + this->x;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = this->instr_operand + this->x;
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_absy()
 {
-	uint16_t target_address = this->instr_operand + this->y;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = this->instr_operand + this->y;
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_imd() 
@@ -652,8 +659,8 @@ void CPU6502::mod_idr()
 	else
 		most_significant_byte = this->cpu_bus->read(this->instr_operand + 1);
 
-	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
-	this->instr_operand = target_address;
+	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
+	this->instr_operand = this->target_address;
 }
 
 void CPU6502::mod_idrx()
@@ -664,8 +671,8 @@ void CPU6502::mod_idrx()
 	uint8_t least_significant_byte = this->cpu_bus->read(lsb_loc);
 	uint8_t most_significant_byte = this->cpu_bus->read(msb_loc);
 
-	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_idry()
@@ -676,6 +683,6 @@ void CPU6502::mod_idry()
 	uint8_t least_significant_byte = this->cpu_bus->read(lsb_loc);
 	uint8_t most_significant_byte = this->cpu_bus->read(msb_loc);
 
-	uint16_t target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte + this->y;
-	this->data_extracted = this->cpu_bus->read(target_address);
+	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte + this->y;
+	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
