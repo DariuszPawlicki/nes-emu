@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+// linijka 3637 - błąd testu
 
 void CPU6502::connect_bus(CpuBus* cpu_bus){ this->cpu_bus = cpu_bus; }
 
@@ -34,11 +35,11 @@ void CPU6502::cycle()
 { 
 	// Fetch
 	
-	uint8_t instr_opcode = this->cpu_bus->read(this->pc); 
+	this->instr_opcode = this->cpu_bus->read(this->pc); 
 	
 	// Decode
 
-	CPU6502::Instruction cur_instruction = this->op_map[instr_opcode]; 
+	CPU6502::Instruction cur_instruction = this->op_map[this->instr_opcode]; 
 	std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
 	uint8_t operand_bytes = this->operand_bytes[addressing_name];
 
@@ -61,13 +62,6 @@ void CPU6502::cycle()
 
 	(this->*(cur_instruction.adr_mod))();	
 	(this->*(cur_instruction.operation))();
-
-	if(cur_instruction.adr_mod == &CPU6502::mod_acc)
-		this->acc = this->data_extracted;
-	else if(cur_instruction.adr_mod != &CPU6502::mod_imd && 
-		    cur_instruction.adr_mod != &CPU6502::mod_imp &&
-			cur_instruction.adr_mod != &CPU6502::mod_rel)
-		this->cpu_bus->write(this->target_address, this->data_extracted);
 }
 
 void CPU6502::clear_memory(){  }
@@ -156,6 +150,11 @@ void CPU6502::ASL()
 	this->set_flag(Carry, this->data_extracted >= 128);
 
 	this->data_extracted <<= 1;
+
+	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
+		this->acc = this->data_extracted;
+	else
+		this->cpu_bus->write(this->target_address, this->data_extracted);
 
 	this->set_flag(Zero, this->data_extracted == 0);
 	this->set_flag(Negative, this->data_extracted >= 128);	
@@ -289,12 +288,12 @@ void CPU6502::CPY()
 
 void CPU6502::DEC()
 {
-	uint8_t& data = this->data_extracted;
+	this->data_extracted--;
 
-	data--;
+	this->cpu_bus->write(this->target_address, this->data_extracted);
 
-	this->set_flag(Zero, data == 0);
-	this->set_flag(Negative, data >= 128);
+	this->set_flag(Zero, this->data_extracted == 0);
+	this->set_flag(Negative, this->data_extracted >= 128);
 }
 
 void CPU6502::DEX()
@@ -323,12 +322,12 @@ void CPU6502::EOR()
 
 void CPU6502::INC()
 {
-	uint8_t& data = this->data_extracted;
+	this->data_extracted++;
 
-	data++;
+	this->cpu_bus->write(this->target_address, this->data_extracted);
 
-	this->set_flag(Zero, data == 0);
-	this->set_flag(Negative, data >= 128);
+	this->set_flag(Zero, this->data_extracted == 0);
+	this->set_flag(Negative, this->data_extracted >= 128);
 }
 
 void CPU6502::INX()
@@ -392,6 +391,11 @@ void CPU6502::LSR()
 
 	this->data_extracted >>= 1;
 
+	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
+		this->acc = this->data_extracted;
+	else
+		this->cpu_bus->write(this->target_address, this->data_extracted);
+
 	this->set_flag(Zero, this->data_extracted == 0);
 	this->set_flag(Negative, this->data_extracted >= 128);
 }
@@ -449,6 +453,11 @@ void CPU6502::ROL()
 	this->data_extracted <<= 1;
 	this->data_extracted += carry;
 
+	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
+		this->acc = this->data_extracted;
+	else
+		this->cpu_bus->write(this->target_address, this->data_extracted);
+
 	this->set_flag(Zero, this->data_extracted == 0);
 	this->set_flag(Negative, this->data_extracted >= 128);
 }
@@ -462,6 +471,11 @@ void CPU6502::ROR()
 
 	this->data_extracted >>= 1;
 	this->data_extracted |= carry << 7;
+
+	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
+		this->acc = this->data_extracted;
+	else
+		this->cpu_bus->write(this->target_address, this->data_extracted);
 
 	this->set_flag(Zero, this->data_extracted == 0);
 	this->set_flag(Negative, this->data_extracted >= 128);
@@ -519,17 +533,17 @@ void CPU6502::SEI()
 
 void CPU6502::STA()
 {
-	this->data_extracted = this->acc;
+	this->cpu_bus->write(this->target_address, this->acc);
 }
 
 void CPU6502::STX()
 {
-	this->data_extracted = this->x;
+	this->cpu_bus->write(this->target_address, this->x);
 }
 
 void CPU6502::STY()
 {
-	this->data_extracted = this->y;
+	this->cpu_bus->write(this->target_address, this->y);
 }
 
 void CPU6502::TAX()
@@ -606,13 +620,13 @@ void CPU6502::mod_zp()
 
 void CPU6502::mod_zpx()
 {	  
-	uint8_t target_address = this->instr_operand + this->x;
+	this->target_address = (this->instr_operand + this->x) & 0x00FF;
 	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
 void CPU6502::mod_zpy()
 {
-	uint8_t target_address = this->instr_operand + this->y;
+	this->target_address = (this->instr_operand + this->y) & 0x00FF;
 	this->data_extracted = this->cpu_bus->read(this->target_address);
 }
 
