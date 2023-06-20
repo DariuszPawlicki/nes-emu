@@ -1,6 +1,6 @@
 #include "NESConsole.hpp"
-#include <iostream>
 
+#include <iostream>
 
 
 int main()
@@ -30,7 +30,7 @@ int main()
             nes.insert_cartridge_and_power_up(nes.selected_rom_path);
             nes.ui.reset_helpers();
         }   
-              
+
         window.clear(sf::Color(102, 102, 255, 255));
         ImGui::SFML::Render(window);
         window.display();
