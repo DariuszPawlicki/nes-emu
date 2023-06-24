@@ -43,8 +43,8 @@ class UserInterface
         
     
     private:
-        void show_cpu_debugger(CpuBus& cpu_bus);
-        void show_ppu_debugger(PPU& ppu);
+        void showCpuDebugger(CpuBus& cpu_bus);
+        void showPpuDebugger(PPU& ppu);
         std::vector<std::string> disassemble(CPU6502& cpu);
 
     public:
@@ -53,10 +53,8 @@ class UserInterface
         UserInterface();
         ~UserInterface();
 
-        std::string get_selected_rom_path();
-        bool is_restart_checked();
-        void show_main_menu(CpuBus& cpu_bus);        // Passing cpu bus
-                                                    //  for convenient data access
-                                                   //   needed for a debugger etc.
-        void reset_helpers();                                                                 
+        std::string getSelectedRomPath();
+        bool isRestartChecked();
+        void showMainMenu(CpuBus& cpu_bus);
+        void resetHelpers();
 };

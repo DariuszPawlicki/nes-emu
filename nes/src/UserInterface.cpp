@@ -1,72 +1,64 @@
 #include "UserInterface.hpp"
 
 
-UserInterface::UserInterface()
-{
+UserInterface::UserInterface() {
     auto height = sf::VideoMode::getDesktopMode().height;
     auto width = sf::VideoMode::getDesktopMode().width;
 
-    this->window = new sf::RenderWindow(sf::VideoMode(width, height), "NES-EMU");
-    this->window->setVerticalSyncEnabled(true);  
+    window = new sf::RenderWindow(sf::VideoMode(width, height), "NES-EMU");
+    window->setVerticalSyncEnabled(true);
 
-    ImGui::SFML::Init(*(this->window));
+    ImGui::SFML::Init(*(window));
 
-    this->reset_helpers();
+    resetHelpers();
 }
 
-UserInterface::~UserInterface(){ delete this->window; }
+UserInterface::~UserInterface() { delete window; }
 
-std::string UserInterface::get_selected_rom_path(){ return this->selected_rom_path; }
+std::string UserInterface::getSelectedRomPath() { return selected_rom_path; }
 
-bool UserInterface::is_restart_checked() { return this->restart; }
+bool UserInterface::isRestartChecked() { return restart; }
 
-void UserInterface::show_main_menu(CpuBus& cpu_bus)
-{
-    this->file_browser.SetTitle("Choose ROM");
-    this->file_browser.SetTypeFilters({".nes"});
+void UserInterface::showMainMenu(CpuBus& cpu_bus) {
+    file_browser.SetTitle("Choose ROM");
+    file_browser.SetTypeFilters({".nes"});
 
-    if(ImGui::BeginMainMenuBar())
-    {
-        if(ImGui::BeginMenu("File"))
-        {
-            if(ImGui::MenuItem("Insert Cartridge"))
-                this->file_browser.Open();
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Insert Cartridge"))
+                file_browser.Open();
 
-            if(ImGui::MenuItem("Reload ROM"))
-                this->restart = true;
+            if (ImGui::MenuItem("Reload ROM"))
+                restart = true;
 
-            if(ImGui::MenuItem("Quit"))
-                this->window->close();
+            if (ImGui::MenuItem("Quit"))
+                window->close();
 
             ImGui::EndMenu();
-        } 
+        }
 
-        if(ImGui::BeginMenu("Options"))
-        {
+        if (ImGui::BeginMenu("Options")) {
             ImGui::MenuItem("Debug Mode", "", &debug_mode);
             ImGui::EndMenu();
         }
-        
-        this->file_browser.Display();
 
-        if(this->file_browser.HasSelected())
-        {
-            this->selected_rom_path = file_browser.GetSelected().string();
-            this->file_browser.ClearSelected();
+        file_browser.Display();
+
+        if (file_browser.HasSelected()) {
+            selected_rom_path = file_browser.GetSelected().string();
+            file_browser.ClearSelected();
         }
 
-        if(this->debug_mode)
-        {
-            this->show_cpu_debugger(cpu_bus);
-            //this->show_ppu_debugger(ppu);
+        if (debug_mode) {
+            showCpuDebugger(cpu_bus);
+            //showPpuDebugger(ppu);
         }
-            
-        ImGui::EndMainMenuBar();      
-    }     
+
+        ImGui::EndMainMenuBar();
+    }
 }
 
-void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
-{  
+void UserInterface::showCpuDebugger(CpuBus& cpu_bus) {
     CPU6502& cpu = cpu_bus.cpu;
 
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
@@ -88,14 +80,12 @@ void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
                 status.getBit(3), status.getBit(2), status.getBit(1), status.getBit(0));
 
     ImGui::Separator();
-    
-    std::vector<std::string> disassembled_instructions;
-    disassembled_instructions = this->disassemble(cpu);
 
-    if(ImGui::BeginTable("Instructions", 1))
-    {
-        for(auto it = disassembled_instructions.begin(); it != disassembled_instructions.end(); it++)
-        {
+    std::vector<std::string> disassembled_instructions;
+    disassembled_instructions = disassemble(cpu);
+
+    if (ImGui::BeginTable("Instructions", 1)) {
+        for (auto it = disassembled_instructions.begin(); it != disassembled_instructions.end(); it++) {
             std::string decoded = *it;
 
             ImGui::TableNextRow();
@@ -103,59 +93,54 @@ void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
             ImGui::Text(decoded.c_str());
         }
         ImGui::EndTable();
-    }  
+    }
 
     ImGui::SetCursorPos({353, 250});
     ImGui::PushItemWidth(40);
-    ImGui::InputText(" ", this->breakpoint_str, IM_ARRAYSIZE(this->breakpoint_str)); 
+    ImGui::InputText(" ", breakpoint_str, IM_ARRAYSIZE(breakpoint_str));
 
-    ImGui::SetCursorPos({403, 250});    
-    if(ImGui::Button("Set Breakpoint", {120, 19}))
-    {
+    ImGui::SetCursorPos({403, 250});
+    if (ImGui::Button("Set Breakpoint", {120, 19})) {
         std::stringstream break_hex;
 
-        break_hex << std::hex << this->breakpoint_str;
-        break_hex >> this->breakpoint;
-        memset(&this->breakpoint_str, (int)'\0', 4);
+        break_hex << std::hex << breakpoint_str;
+        break_hex >> breakpoint;
+        memset(&breakpoint_str, (int) '\0', 4);
     }
 
     ImGui::SetCursorPos({353, 200});
-    ImGui::Text("Step: %d", this->step_num);
+    ImGui::Text("Step: %d", step_num);
 
     ImGui::SetCursorPos({353, 220});
-    ImGui::Text("Breakpoint: 0x%X", this->breakpoint);
+    ImGui::Text("Breakpoint: 0x%X", breakpoint);
 
     ImGui::SetCursorPos({353, 351});
-    if(ImGui::Button("Run To Breakpoint", {125, 30}))
-    {
-        while(cpu.pc != breakpoint)
-        {
+    if (ImGui::Button("Run To Breakpoint", {125, 30})) {
+        while (cpu.pc != breakpoint) {
             cpu.cycle();
-            this->step_num++;
-        }           
+            step_num++;
+        }
     }
 
     ImGui::SetCursorPos({353, 320});
-    if(ImGui::Button("Step", {125, 30}))
-    {       
+    if (ImGui::Button("Step", {125, 30})) {
         cpu.cycle();
-        this->step_num++;
+        step_num++;
     }
 
     ImGui::PushItemWidth(40);
     ImGui::SetCursorPos({270, 25});
-    ImGui::InputText("", this->pc_input, IM_ARRAYSIZE(this->pc_input));
+    ImGui::InputText("", pc_input, IM_ARRAYSIZE(pc_input));
 
-    ImGui::SetCursorPos({320, 25});    
-    if(ImGui::Button("Set PC", {60, 19}))
-    {
+    ImGui::SetCursorPos({320, 25});
+    if (ImGui::Button("Set PC", {60, 19})) {
         std::stringstream pc_hex;
 
-        pc_hex << std::hex << this->pc_input;
+        pc_hex << std::hex << pc_input;
         pc_hex >> cpu.pc;
-        memset(&this->pc_input, (int)'\0', 4);
+        memset(&pc_input, (int) '\0', 4);
     }
-    
+
     ImGui::SetCursorPos({393, 25});
     ImGui::Text("X: %.2f Y: %.2f", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
@@ -165,27 +150,24 @@ void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
     ImGui::SetNextWindowPos({652, 19}, ImGuiCond_Once);
 
     for (int i = 0; i <= 0xFFFF; i++)
-        this->cpu_mem_layout[i] = cpu_bus.read(i);
+        cpu_mem_layout[i] = cpu_bus.read(i);
 
-    this->cpu_mem_edit.DrawWindow("CPU Memory", &this->cpu_mem_layout, 64 * 1024); 
+    cpu_mem_edit.DrawWindow("CPU Memory", &cpu_mem_layout, 64 * 1024);
 }
 
-void UserInterface::show_ppu_debugger(PPU& ppu)
-{
+void UserInterface::showPpuDebugger(PPU& ppu) {
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({300, 110}, ImGuiCond_Once);
 
-    //this->ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
+    //ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
 }
 
-std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
-{
+std::vector<std::string> UserInterface::disassemble(CPU6502& cpu) {
     std::vector<std::string> disassembled_instructions;
 
     uint16_t tmp_pc = cpu.pc;
 
-    for(int i = 0; i < 27; i++)
-    {
+    for (int i = 0; i < 27; i++) {
         std::stringstream dis_instruction;
 
         uint8_t op_code = cpu.read(tmp_pc);
@@ -194,46 +176,44 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
         std::string addressing_name = instruction.op_name.substr(4, instruction.op_name.length());
         uint8_t operand_bytes = cpu.operand_bytes[addressing_name];
         std::vector<uint8_t> operands;
-        
-        dis_instruction << '$' << std::hex << std::setw(4); 
+
+        dis_instruction << '$' << std::hex << std::setw(4);
         dis_instruction << std::setfill('0') << tmp_pc << "   ";              // Print pc address e.g. $0F01
         dis_instruction << std::hex << std::uppercase << std::setw(2);       //  Print operation
-                                                                            //   hex value e.g. 0B
-        dis_instruction << std::setfill('0') << (uint16_t)op_code << ' '; 
+        //   hex value e.g. 0B
+        dis_instruction << std::setfill('0') << (uint16_t) op_code << ' ';
 
-        for(int j = 1; j <= operand_bytes; j++)
-        {
+        for (int j = 1; j <= operand_bytes; j++) {
             operands.push_back(cpu.read(tmp_pc + j));
 
             dis_instruction << std::hex << std::uppercase << std::setfill('0');   // Print operands padded with 0
-                                                                                    //  to length 2 e.g. operand 9 = 09
-            dis_instruction << std::setw(2) << (uint16_t)operands.back() << ' ';
+            //  to length 2 e.g. operand 9 = 09
+            dis_instruction << std::setw(2) << (uint16_t) operands.back() << ' ';
         }
 
-        for(int i = 0; i < ((2 - operand_bytes) * 3) + 4; i++)
+        for (int i = 0; i < ((2 - operand_bytes) * 3) + 4; i++)
             dis_instruction << ' ';
 
         dis_instruction << instruction.op_name << ' ';
 
-        if(operand_bytes > 0)
-        {
+        if (operand_bytes > 0) {
             uint16_t full_operand;
 
-            if(operand_bytes == 1)
+            if (operand_bytes == 1)
                 full_operand = operands[0];
-            else if(operand_bytes == 2)
-                full_operand = ((uint16_t)operands[1] << 8) + (uint16_t)operands[0];
+            else if (operand_bytes == 2)
+                full_operand = ((uint16_t) operands[1] << 8) + (uint16_t) operands[0];
 
-            if(addressing_name == "IMD") // If instruction addressing is immediate then
-                                        //  print operand in form #$ instead $
+            if (addressing_name == "IMD") // If instruction addressing is immediate then
+                //  print operand in form #$ instead $
                 dis_instruction << '#';
-            else if(addressing_name == "REL") // Commented in CPU6502 mod_rel function
-                full_operand = tmp_pc + (int8_t)full_operand + 2;
-                
+            else if (addressing_name == "REL") // Commented in CPU6502 mod_rel function
+                full_operand = tmp_pc + (int8_t) full_operand + 2;
+
             dis_instruction << '$' << std::setfill('0') << std::setw(4);
             dis_instruction << std::hex << full_operand;
         }
-        
+
         dis_instruction << '\n';
 
         tmp_pc += operand_bytes + 1;
@@ -247,11 +227,10 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu)
     return disassembled_instructions;
 }
 
-void UserInterface::reset_helpers()
-{
-    memset(&this->breakpoint_str, '\0', 4);
-    memset(&this->pc_input, '\0', 4);
-    this->breakpoint = 0;
-    this->step_num = 1;
-    this->restart = false;
+void UserInterface::resetHelpers() {
+    memset(&breakpoint_str, '\0', 4);
+    memset(&pc_input, '\0', 4);
+    breakpoint = 0;
+    step_num = 1;
+    restart = false;
 }

@@ -1,16 +1,15 @@
 #include "NESConsole.hpp"
 
 
-int main()
-{
-	NESConsole nes;
+int main() {
+    NESConsole nes;
 
     sf::RenderWindow& window = *(nes.ui.window);
-	sf::Clock clock;
+    sf::Clock clock;
 
     while (window.isOpen()) {
         sf::Event event;
-        
+
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(event);
 
@@ -22,11 +21,10 @@ int main()
 
         nes.showMainMenu();
 
-        if(nes.isRomChanged() || nes.ui.is_restart_checked())
-        {
+        if (nes.isRomChanged() || nes.ui.isRestartChecked()) {
             nes.insertCartridgeAndPowerUp(nes.selected_rom_path);
-            nes.ui.reset_helpers();
-        }   
+            nes.ui.resetHelpers();
+        }
 
         window.clear(sf::Color(102, 102, 255, 255));
         ImGui::SFML::Render(window);
@@ -35,5 +33,5 @@ int main()
 
     ImGui::SFML::Shutdown();
 
-	return 0;
+    return 0;
 }
