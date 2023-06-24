@@ -1,702 +1,635 @@
 #include "CPU6502.hpp"
 #include "CpuBus.hpp"
 
-#include <iostream>
-
 // linijka 3637 - błąd testu
 
-void CPU6502::connect_bus(CpuBus* cpu_bus){ this->cpu_bus = cpu_bus; }
+void CPU6502::connectBus(CpuBus *cpu_bus) { cpu_bus = cpu_bus; }
 
 
-void CPU6502::power_up()
-{
-	uint8_t vector_lsb = this->cpu_bus->read(0xFFFC); // Setting program counter to address
-												   	 //  stored in reset vector
-	uint8_t vector_msb = this->cpu_bus->read(0xFFFD);
+void CPU6502::powerUp() {
+    uint8_t vector_lsb = cpu_bus->read(0xFFFC); // Setting program counter to address
+    //  stored in reset vector
+    uint8_t vector_msb = cpu_bus->read(0xFFFD);
 
-	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
-	this->status.set_value(0x34);
-	this->acc = 0;
-	this->x = 0;
-	this->y = 0;
-	this->sp = 0xFD;
-	this->cpu_bus->write(0x4015, 0);
-	this->cpu_bus->write(0x4017, 0);
+    pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+    status.setByteValue(0x34);
+    acc = 0;
+    x = 0;
+    y = 0;
+    sp = 0xFD;
+    cpu_bus->write(0x4015, 0);
+    cpu_bus->write(0x4017, 0);
 
-	for(int i = 0; i <= 16; i++)
-		this->cpu_bus->write(0x4000 + i, 0);
-	
-	for(int i = 0; i <= 3; i++)
-		this->cpu_bus->write(0x4010 + i, 0);
-}
+    for (int i = 0; i <= 16; ++i) {
+        cpu_bus->write(0x4000 + i, 0);
+    }
 
+    for (int i = 0; i <= 3; ++i) {
+        cpu_bus->write(0x4010 + i, 0);
+    }
+}
 
-void CPU6502::cycle() 
-{ 
-	// Fetch
-	
-	this->instr_opcode = this->cpu_bus->read(this->pc); 
-	
-	// Decode
 
-	CPU6502::Instruction cur_instruction = this->op_map[this->instr_opcode]; 
-	std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
-	uint8_t operand_bytes = this->operand_bytes[addressing_name];
+void CPU6502::cycle() {
+    // Fetch
+    instr_opcode = cpu_bus->read(pc);
 
-	this->pc++;
+    // Decode
+    CPU6502::Instruction cur_instruction = op_map[instr_opcode];
+    std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
+    uint8_t operand_bytes = this->operand_bytes[addressing_name];
 
-	if(operand_bytes == 1)
-	{
-		this->instr_operand = this->cpu_bus->read(this->pc);
-		this->pc++;
-	}
-	else if(operand_bytes == 2)
-	{
-		this->instr_operand = this->cpu_bus->read(this->pc);
-		this->pc++;
-		this->instr_operand += this->cpu_bus->read(this->pc) << 8;
-		this->pc++;
-	}
+    ++pc;
 
-	// Execute
+    if (operand_bytes == 1) {
+        instr_operand = cpu_bus->read(pc);
+        ++pc;
+    }
+    else if (operand_bytes == 2) {
+        instr_operand = cpu_bus->read(pc);
+        ++pc;
+        instr_operand += cpu_bus->read(pc) << 8;
+        ++pc;
+    }
 
-	(this->*(cur_instruction.adr_mod))();	
-	(this->*(cur_instruction.operation))();
+    // Execute
+    (this->*(cur_instruction.adr_mod))();
+    (this->*(cur_instruction.operation))();
 }
 
-void CPU6502::clear_memory(){  }
+void CPU6502::clearMemory() {}
 
-void CPU6502::write(uint16_t address, uint8_t data) { this->cpu_bus->write(address, data); }
+void CPU6502::write(uint16_t address, uint8_t data) { cpu_bus->write(address, data); }
 
-uint8_t CPU6502::read(uint16_t address){ return this->cpu_bus->read(address); }
+uint8_t CPU6502::read(uint16_t address) { return cpu_bus->read(address); }
 
-bool CPU6502::extract_flag(CPU6502::Flags flag) { return this->status.get_bit(flag); }
+bool CPU6502::extractFlag(Flags flag) { return status.getBit(flag); }
 
-void CPU6502::set_flag(CPU6502::Flags flag, bool flag_value) { this->status.set_bit(flag, flag_value); }
+void CPU6502::setFlag(Flags flag, bool flag_value) { status.setBit(flag, flag_value); }
 
-void CPU6502::stack_push(uint8_t data) 
-{
-	this->cpu_bus->write(STACK_BEGINNING + this->sp, data);
-	this->sp--;
+void CPU6502::stackPush(uint8_t data) {
+    cpu_bus->write(STACK_BEGINNING + sp, data);
+    --sp;
 }
 
-uint8_t CPU6502::stack_pull() 
-{
-	uint8_t data = this->cpu_bus->read(STACK_BEGINNING + (++this->sp));
-	return data;
+uint8_t CPU6502::stackPull() {
+    uint8_t data = cpu_bus->read(STACK_BEGINNING + (++sp));
+    return data;
 }
 
-void CPU6502::reset()
-{
-	if(this->extract_flag(InterruptDisable) == false)
-	{
-		uint8_t vector_lsb = this->cpu_bus->read(0xFFFC);
-		uint8_t vector_msb = this->cpu_bus->read(0xFFFD);
+void CPU6502::reset() {
+    if (!extractFlag(InterruptDisable)) {
+        uint8_t vector_lsb = cpu_bus->read(0xFFFC);
+        uint8_t vector_msb = cpu_bus->read(0xFFFD);
 
-		this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
-		this->set_flag(InterruptDisable, true);
-		this->sp -= 3;
-	}
+        pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+        setFlag(InterruptDisable, true);
+        sp -= 3;
+    }
 }
 
-void CPU6502::irq()
-{
-	if(this->extract_flag(InterruptDisable) == false)
-	{
-		uint8_t vector_lsb = this->cpu_bus->read(0xFFFE);
-		uint8_t vector_msb = this->cpu_bus->read(0xFFFF);
+void CPU6502::irq() {
+    if (!extractFlag(InterruptDisable)) {
+        uint8_t vector_lsb = cpu_bus->read(0xFFFE);
+        uint8_t vector_msb = cpu_bus->read(0xFFFF);
 
-		this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
-	}
+        pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+    }
 }
 
-void CPU6502::nmi()
-{
-	uint8_t vector_lsb = this->cpu_bus->read(0xFFFA);
-	uint8_t vector_msb = this->cpu_bus->read(0xFFFB);
+void CPU6502::nmi() {
+    uint8_t vector_lsb = cpu_bus->read(0xFFFA);
+    uint8_t vector_msb = cpu_bus->read(0xFFFB);
 
-	this->pc = (uint16_t)(vector_msb << 8) + (uint16_t)vector_lsb;
+    pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
 }
+
+void CPU6502::ADC() {
+    uint8_t memory_data = data_extracted;
+    bool carry = extractFlag(Carry);
+    uint16_t result = acc + memory_data + carry;
 
-void CPU6502::ADC()
-{
-	uint8_t memory_data = this->data_extracted;
-	bool carry = this->extract_flag(Carry);
-	uint16_t result = this->acc + memory_data + carry;
+    bool acc_7b = (acc & 0x80) >> 7;
+    bool memory_7b = (memory_data & 0x80) >> 7;
+    bool r_7b = (result & 0x80) >> 7;
 
-	bool acc_7b = (this->acc & 0x80) >> 7;
-	bool memory_7b = (memory_data & 0x80) >> 7;
-	bool r_7b = (result & 0x80) >> 7;
-	
-	this->set_flag(Overflow, ~(acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
-	this->set_flag(Carry, result > 255);
+    setFlag(Overflow, ~(acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
+    setFlag(Carry, result > 255);
 
-	this->acc = result;
+    acc = result;
 
-	this->set_flag(Zero, this->acc == 0);	
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::AND() 
-{
-	this->acc &= this->data_extracted;
+void CPU6502::AND() {
+    acc &= data_extracted;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::ASL() 
-{
-	this->set_flag(Carry, this->data_extracted >= 128);
+void CPU6502::ASL() {
+    setFlag(Carry, data_extracted >= 128);
 
-	this->data_extracted <<= 1;
+    data_extracted <<= 1;
 
-	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
-		this->acc = this->data_extracted;
-	else
-		this->cpu_bus->write(this->target_address, this->data_extracted);
+    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+        acc = data_extracted;
+    }
+    else {
+        cpu_bus->write(target_address, data_extracted);
+    }
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);	
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::BCC()
-{
-	if (this->extract_flag(Carry) == false)
-		this->pc = this->instr_operand;
+void CPU6502::BCC() {
+    if (!extractFlag(Carry)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BCS()
-{
-	if (this->extract_flag(Carry) == true)
-		this->pc = this->instr_operand;
+void CPU6502::BCS() {
+    if (extractFlag(Carry)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BEQ()
-{
-	if (this->extract_flag(Zero) == true)
-		this->pc = this->instr_operand;
+void CPU6502::BEQ() {
+    if (extractFlag(Zero)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BIT()
-{
-	uint8_t data = this->data_extracted;
-	
-	this->set_flag(Overflow, ((data & 0x40) >> 6) == 1);
-	this->set_flag(Negative, ((data & 0x80) >> 7) == 1);
+void CPU6502::BIT() {
+    uint8_t data = data_extracted;
 
-	data &= this->acc;
+    setFlag(Overflow, ((data & 0x40) >> 6) == 1);
+    setFlag(Negative, ((data & 0x80) >> 7) == 1);
 
-	this->set_flag(Zero, data == 0);
+    data &= acc;
+
+    setFlag(Zero, data == 0);
 }
 
-void CPU6502::BMI()
-{
-	if (this->extract_flag(Negative) == true)
-		this->pc = this->instr_operand;
+void CPU6502::BMI() {
+    if (extractFlag(Negative)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BNE()
-{
-	if (this->extract_flag(Zero) == false)
-		this->pc = this->instr_operand;
+void CPU6502::BNE() {
+    if (!extractFlag(Zero)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BPL()
-{
-	if (this->extract_flag(Negative) == false)
-		this->pc = this->instr_operand;
+void CPU6502::BPL() {
+    if (!extractFlag(Negative)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BRK()
-{
-	this->stack_push((this->pc >> 8) & 0x00FF);
-	this->stack_push(this->pc & 0x00FF);
+void CPU6502::BRK() {
+    stackPush((pc >> 8) & 0x00FF);
+    stackPush(pc & 0x00FF);
 
-	uint8_t irq_lsb = this->cpu_bus->read(0xFFFE);
-	uint8_t irq_msb = this->cpu_bus->read(0xFFFF);
+    uint8_t irq_lsb = cpu_bus->read(0xFFFE);
+    uint8_t irq_msb = cpu_bus->read(0xFFFF);
 
-	this->pc = ((uint16_t)irq_msb << 8) + (uint16_t)irq_lsb;
+    pc = ((uint16_t) irq_msb << 8) + (uint16_t) irq_lsb;
 
-	this->set_flag(InterruptDisable, true);
-	this->set_flag(Break, true);
-	this->set_flag(Unused, true);
+    setFlag(InterruptDisable, true);
+    setFlag(Break, true);
+    setFlag(Unused, true);
 
-	this->stack_push(this->status.get_value());
+    stackPush(status.getByteValue());
 
-	this->set_flag(Break, false);
+    setFlag(Break, false);
 }
 
-void CPU6502::BVC()
-{
-	if (this->extract_flag(Overflow) == false)
-		this->pc = this->instr_operand;
+void CPU6502::BVC() {
+    if (!extractFlag(Overflow)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::BVS()
-{
-	if (this->extract_flag(Overflow) == true)
-		this->pc = this->instr_operand;
+void CPU6502::BVS() {
+    if (extractFlag(Overflow)) {
+        pc = instr_operand;
+    }
 }
 
-void CPU6502::CLC()
-{
-	this->set_flag(Carry, false);
+void CPU6502::CLC() {
+    setFlag(Carry, false);
 }
 
-void CPU6502::CLD()
-{
-	this->set_flag(Decimal, false);
+void CPU6502::CLD() {
+    setFlag(Decimal, false);
 }
 
-void CPU6502::CLI()
-{
-	this->set_flag(InterruptDisable, false);
+void CPU6502::CLI() {
+    setFlag(InterruptDisable, false);
 }
 
-void CPU6502::CLV()
-{
-	this->set_flag(Overflow, false);
+void CPU6502::CLV() {
+    setFlag(Overflow, false);
 }
 
-void CPU6502::CMP()
-{
-	uint8_t data = this->data_extracted;
+void CPU6502::CMP() {
+    uint8_t data = data_extracted;
 
-	this->set_flag(Carry, this->acc >= data);
-	this->set_flag(Zero, this->acc == data);
-	this->set_flag(Negative, (uint8_t)(this->acc - data) >= 128);
+    setFlag(Carry, acc >= data);
+    setFlag(Zero, acc == data);
+    setFlag(Negative, (uint8_t) (acc - data) >= 128);
 }
 
-void CPU6502::CPX()
-{
-	uint8_t data = this->data_extracted;
+void CPU6502::CPX() {
+    uint8_t data = data_extracted;
 
-	this->set_flag(Carry, this->x >= data);
-	this->set_flag(Zero, this->x == data);
-	this->set_flag(Negative, (uint8_t)(this->x - data) >= 128);
+    setFlag(Carry, x >= data);
+    setFlag(Zero, x == data);
+    setFlag(Negative, (uint8_t) (x - data) >= 128);
 }
 
-void CPU6502::CPY()
-{
-	uint8_t data = this->data_extracted;
+void CPU6502::CPY() {
+    uint8_t data = data_extracted;
 
-	this->set_flag(Carry, this->y >= data);
-	this->set_flag(Zero, this->y == data);
-	this->set_flag(Negative, (uint8_t)(this->y - data) >= 128);
+    setFlag(Carry, y >= data);
+    setFlag(Zero, y == data);
+    setFlag(Negative, (uint8_t) (y - data) >= 128);
 }
 
-void CPU6502::DEC()
-{
-	this->data_extracted--;
+void CPU6502::DEC() {
+    data_extracted--;
 
-	this->cpu_bus->write(this->target_address, this->data_extracted);
+    cpu_bus->write(target_address, data_extracted);
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::DEX()
-{
-	this->x--;
+void CPU6502::DEX() {
+    --x;
 
-	this->set_flag(Zero, this->x == 0);
-	this->set_flag(Negative, this->x >= 128);
+    setFlag(Zero, x == 0);
+    setFlag(Negative, x >= 128);
 }
 
-void CPU6502::DEY()
-{
-	this->y--;
+void CPU6502::DEY() {
+    --y;
 
-	this->set_flag(Zero, this->y == 0);
-	this->set_flag(Negative, this->y >= 128);
+    setFlag(Zero, y == 0);
+    setFlag(Negative, y >= 128);
 }
 
-void CPU6502::EOR()
-{
-	this->acc ^= this->data_extracted;
+void CPU6502::EOR() {
+    acc ^= data_extracted;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::INC()
-{
-	this->data_extracted++;
+void CPU6502::INC() {
+    ++data_extracted;
 
-	this->cpu_bus->write(this->target_address, this->data_extracted);
+    cpu_bus->write(target_address, data_extracted);
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::INX()
-{
-	this->x++;
+void CPU6502::INX() {
+    ++x;
 
-	this->set_flag(Zero, this->x == 0);
-	this->set_flag(Negative, this->x >= 128);
+    setFlag(Zero, x == 0);
+    setFlag(Negative, x >= 128);
 }
 
-void CPU6502::INY()
-{
-	this->y++;
+void CPU6502::INY() {
+    ++y;
 
-	this->set_flag(Zero, this->y == 0);
-	this->set_flag(Negative, this->y >= 128);
+    setFlag(Zero, y == 0);
+    setFlag(Negative, y >= 128);
 }
 
-void CPU6502::JMP()
-{
-	this->pc = this->instr_operand;
+void CPU6502::JMP() {
+    pc = instr_operand;
 }
 
-void CPU6502::JSR()
-{	
-	this->pc--;
+void CPU6502::JSR() {
+    --pc;
 
-	this->stack_push(this->pc >> 8);
-	this->stack_push(this->pc & 0x00FF);
+    stackPush(pc >> 8);
+    stackPush(pc & 0x00FF);
 
-	this->pc = this->instr_operand;
+    pc = instr_operand;
 }
 
-void CPU6502::LDA()
-{
-	this->acc = this->data_extracted;
+void CPU6502::LDA() {
+    acc = data_extracted;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::LDX()
-{
-	this->x = this->data_extracted;
+void CPU6502::LDX() {
+    x = data_extracted;
 
-	this->set_flag(Zero, this->x == 0);
-	this->set_flag(Negative, this->x >= 128);
+    setFlag(Zero, x == 0);
+    setFlag(Negative, x >= 128);
 }
 
-void CPU6502::LDY()
-{
-	this->y = this->data_extracted;
+void CPU6502::LDY() {
+    y = data_extracted;
 
-	this->set_flag(Zero, this->y == 0);
-	this->set_flag(Negative, this->y >= 128);
+    setFlag(Zero, y == 0);
+    setFlag(Negative, y >= 128);
 }
 
-void CPU6502::LSR()
-{
-	this->set_flag(Carry, this->data_extracted % 2);
+void CPU6502::LSR() {
+    setFlag(Carry, data_extracted % 2);
 
-	this->data_extracted >>= 1;
+    data_extracted >>= 1;
 
-	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
-		this->acc = this->data_extracted;
-	else
-		this->cpu_bus->write(this->target_address, this->data_extracted);
+    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+        acc = data_extracted;
+    }
+    else {
+        cpu_bus->write(target_address, data_extracted);
+    }
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::NOP()
-{
-	return;
+void CPU6502::NOP() {
+    return;
 }
 
-void CPU6502::ORA()
-{
-	this->acc |= this->data_extracted;
+void CPU6502::ORA() {
+    acc |= data_extracted;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::PHA()
-{
-	this->stack_push(this->acc);
+void CPU6502::PHA() {
+    stackPush(acc);
 }
 
-void CPU6502::PHP()
-{
-	this->set_flag(Unused, true);
-	this->set_flag(Break, true);
+void CPU6502::PHP() {
+    setFlag(Unused, true);
+    setFlag(Break, true);
 
-	this->stack_push(this->status.get_value());
+    stackPush(status.getByteValue());
 
-	this->set_flag(Unused, false);
-	this->set_flag(Break, false);
+    setFlag(Unused, false);
+    setFlag(Break, false);
 }
 
-void CPU6502::PLA()
-{
-	this->acc = this->stack_pull();
+void CPU6502::PLA() {
+    acc = stackPull();
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::PLP()
-{
-	this->status.set_value(this->stack_pull());
-	this->set_flag(Unused, true);
+void CPU6502::PLP() {
+    status.setByteValue(stackPull());
+    setFlag(Unused, true);
 }
 
-void CPU6502::ROL()
-{
-	bool carry = this->extract_flag(Carry);
+void CPU6502::ROL() {
+    bool carry = extractFlag(Carry);
 
-	this->status.set_value(this->status.get_value() & ~0x1);
-	this->status.set_value(this->status.get_value() | (this->data_extracted & 0x80) >> 7);
+    status.setByteValue(status.getByteValue() & ~0x1);
+    status.setByteValue(status.getByteValue() | (data_extracted & 0x80) >> 7);
 
-	this->data_extracted <<= 1;
-	this->data_extracted += carry;
+    data_extracted <<= 1;
+    data_extracted += carry;
 
-	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
-		this->acc = this->data_extracted;
-	else
-		this->cpu_bus->write(this->target_address, this->data_extracted);
+    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+        acc = data_extracted;
+    }
+    else {
+        cpu_bus->write(target_address, data_extracted);
+    }
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::ROR()
-{
-	bool carry = this->extract_flag(Carry);
+void CPU6502::ROR() {
+    bool carry = extractFlag(Carry);
 
-	this->status.set_value(this->status.get_value() & ~0x1);
-	this->status.set_value(this->status.get_value() | (this->data_extracted & 0x1));
+    status.setByteValue(status.getByteValue() & ~0x1);
+    status.setByteValue(status.getByteValue() | (data_extracted & 0x1));
 
-	this->data_extracted >>= 1;
-	this->data_extracted |= carry << 7;
+    data_extracted >>= 1;
+    data_extracted |= carry << 7;
 
-	if(this->op_map[this->instr_opcode].adr_mod == &CPU6502::mod_acc)
-		this->acc = this->data_extracted;
-	else
-		this->cpu_bus->write(this->target_address, this->data_extracted);
+    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+        acc = data_extracted;
+    }
+    else {
+        cpu_bus->write(target_address, data_extracted);
+    }
 
-	this->set_flag(Zero, this->data_extracted == 0);
-	this->set_flag(Negative, this->data_extracted >= 128);
+    setFlag(Zero, data_extracted == 0);
+    setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::RTI()
-{
-	this->status.set_value(this->stack_pull());
-	
-	this->set_flag(Unused, false);
-	this->set_flag(Break, false);
+void CPU6502::RTI() {
+    status.setByteValue(stackPull());
 
-	this->pc = (uint16_t)this->stack_pull() + ((uint16_t)this->stack_pull() << 8);
+    setFlag(Unused, false);
+    setFlag(Break, false);
+
+    pc = (uint16_t) stackPull() + ((uint16_t) stackPull() << 8);
 }
 
-void CPU6502::RTS()
-{
-	this->pc = (uint16_t)this->stack_pull();
-	this->pc += ((uint16_t)this->stack_pull() << 8) + 1;
+void CPU6502::RTS() {
+    pc = (uint16_t) stackPull();
+    pc += ((uint16_t) stackPull() << 8) + 1;
 }
 
-void CPU6502::SBC()
-{
-	uint8_t memory_data = this->data_extracted;	
-	bool carry = this->extract_flag(Carry);
-	uint16_t result = this->acc + ~memory_data + carry;
+void CPU6502::SBC() {
+    uint8_t memory_data = data_extracted;
+    bool carry = extractFlag(Carry);
+    uint16_t result = acc + ~memory_data + carry;
 
-	bool acc_7b = (this->acc & 0x80) >> 7;
-	bool memory_7b = (memory_data & 0x80) >> 7;
-	bool r_7b = (result & 0x80) >> 7;
+    bool acc_7b = (acc & 0x80) >> 7;
+    bool memory_7b = (memory_data & 0x80) >> 7;
+    bool r_7b = (result & 0x80) >> 7;
 
-	this->set_flag(Overflow, (acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
-	this->set_flag(Carry, !(result > 255));
+    setFlag(Overflow, (acc_7b ^ memory_7b) & (acc_7b ^ r_7b));
+    setFlag(Carry, !(result > 255));
 
-	this->acc = result;
+    acc = result;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::SEC()
-{
-	this->set_flag(Carry, true);
+void CPU6502::SEC() {
+    setFlag(Carry, true);
 }
 
-void CPU6502::SED()
-{
-	this->set_flag(Decimal, true);
+void CPU6502::SED() {
+    setFlag(Decimal, true);
 }
 
-void CPU6502::SEI()
-{
-	this->set_flag(InterruptDisable, true);
+void CPU6502::SEI() {
+    setFlag(InterruptDisable, true);
 }
 
-void CPU6502::STA()
-{
-	this->cpu_bus->write(this->target_address, this->acc);
+void CPU6502::STA() {
+    cpu_bus->write(target_address, acc);
 }
 
-void CPU6502::STX()
-{
-	this->cpu_bus->write(this->target_address, this->x);
+void CPU6502::STX() {
+    cpu_bus->write(target_address, x);
 }
 
-void CPU6502::STY()
-{
-	this->cpu_bus->write(this->target_address, this->y);
+void CPU6502::STY() {
+    cpu_bus->write(target_address, y);
 }
 
-void CPU6502::TAX()
-{
-	this->x = this->acc;
+void CPU6502::TAX() {
+    x = acc;
 
-	this->set_flag(Zero, this->x == 0);
-	this->set_flag(Negative, this->x >= 128);
+    setFlag(Zero, x == 0);
+    setFlag(Negative, x >= 128);
 }
 
-void CPU6502::TAY()
-{
-	this->y = this->acc;
+void CPU6502::TAY() {
+    y = acc;
 
-	this->set_flag(Zero, this->y == 0);
-	this->set_flag(Negative, this->y >= 128);
+    setFlag(Zero, y == 0);
+    setFlag(Negative, y >= 128);
 }
 
-void CPU6502::TSX()
-{
-	this->x = this->sp;
+void CPU6502::TSX() {
+    x = sp;
 
-	this->set_flag(Zero, this->x == 0);
-	this->set_flag(Negative, this->x >= 128);
+    setFlag(Zero, x == 0);
+    setFlag(Negative, x >= 128);
 }
 
-void CPU6502::TXA()
-{
-	this->acc = this->x;
+void CPU6502::TXA() {
+    acc = x;
 
-	this->set_flag(Zero, this->acc == 0);
-	this->set_flag(Negative, this->acc >= 128);
+    setFlag(Zero, acc == 0);
+    setFlag(Negative, acc >= 128);
 }
 
-void CPU6502::TXS()
-{
-	this->sp = this->x;
+void CPU6502::TXS() {
+    sp = x;
 }
 
-void CPU6502::TYA()
-{
-	this->acc = this->y;
+void CPU6502::TYA() {
+    acc = y;
 
-	this->set_flag(Zero, this->y == 0);
-	this->set_flag(Negative, this->y >= 128);
+    setFlag(Zero, y == 0);
+    setFlag(Negative, y >= 128);
 }
 
-void CPU6502::UNK()
-{
-	return;
+void CPU6502::UNK() {
+    return;
 }
+
+void CPU6502::LAX() {
 
-void CPU6502::LAX()
-{
-	
 }
 
-void CPU6502::mod_abs()
-{
-	this->target_address = this->instr_operand;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_abs() {
+    target_address = instr_operand;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_acc()
-{
-	this->data_extracted = this->acc;
+void CPU6502::mod_acc() {
+    data_extracted = acc;
 }
 
-void CPU6502::mod_zp()
-{
-	this->target_address = (this->instr_operand & 0x00FF);
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_zp() {
+    target_address = (instr_operand & 0x00FF);
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_zpx()
-{	  
-	this->target_address = (this->instr_operand + this->x) & 0x00FF;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_zpx() {
+    target_address = (instr_operand + x) & 0x00FF;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_zpy()
-{
-	this->target_address = (this->instr_operand + this->y) & 0x00FF;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_zpy() {
+    target_address = (instr_operand + y) & 0x00FF;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_absx()
-{
-	this->target_address = this->instr_operand + this->x;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_absx() {
+    target_address = instr_operand + x;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_absy()
-{
-	this->target_address = this->instr_operand + this->y;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+void CPU6502::mod_absy() {
+    target_address = instr_operand + y;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_imd() 
-{
-	this->data_extracted = instr_operand;
+void CPU6502::mod_imd() {
+    data_extracted = instr_operand;
 }
 
-void CPU6502::mod_rel()
-{
-	int8_t signed_operand = this->instr_operand;
-	this->instr_operand = signed_operand + this->pc;
+void CPU6502::mod_rel() {
+    int8_t signed_operand = instr_operand;
+    instr_operand = signed_operand + pc;
 }
 
-void CPU6502::mod_imp()
-{
-	return;
+void CPU6502::mod_imp() {
+    return;
 }
 
-void CPU6502::mod_idr()
-{
-	uint8_t least_significant_byte = this->cpu_bus->read(this->instr_operand);
-	uint8_t most_significant_byte;
+void CPU6502::mod_idr() {
+    uint8_t least_significant_byte = cpu_bus->read(instr_operand);
+    uint8_t most_significant_byte;
 
-	/* Implementation of hardware bug. If least significant byte is 0xFF,
-	   then page is not crossed when reading most significant byte, instead
-	   address is wrapped, so if operand is $02FF, then lsb is read from
-	   $02FF and msb is read from $0200 instead of $0300. */
+    /* Implementation of hardware bug. If least significant byte is 0xFF,
+       then page is not crossed when reading most significant byte, instead
+       address is wrapped, so if operand is $02FF, then lsb is read from
+       $02FF and msb is read from $0200 instead of $0300. */
 
-	if((this->instr_operand & 0x00FF) == 0x00FF)		
-		most_significant_byte = this->cpu_bus->read(this->instr_operand & 0xFF00);
-	else
-		most_significant_byte = this->cpu_bus->read(this->instr_operand + 1);
+    if ((instr_operand & 0x00FF) == 0x00FF) {
+        most_significant_byte = cpu_bus->read(instr_operand & 0xFF00);
+    }
+    else {
+        most_significant_byte = cpu_bus->read(instr_operand + 1);
+    }
 
-	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
-	this->instr_operand = this->target_address;
+    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
+    instr_operand = target_address;
 }
 
-void CPU6502::mod_idrx()
-{
-	uint8_t lsb_loc = this->instr_operand + this->x;
-	uint8_t msb_loc = this->instr_operand + this->x + 1;
+void CPU6502::mod_idrx() {
+    uint8_t lsb_loc = instr_operand + x;
+    uint8_t msb_loc = instr_operand + x + 1;
 
-	uint8_t least_significant_byte = this->cpu_bus->read(lsb_loc);
-	uint8_t most_significant_byte = this->cpu_bus->read(msb_loc);
+    uint8_t least_significant_byte = cpu_bus->read(lsb_loc);
+    uint8_t most_significant_byte = cpu_bus->read(msb_loc);
 
-	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
+    data_extracted = cpu_bus->read(target_address);
 }
 
-void CPU6502::mod_idry()
-{
-	uint8_t lsb_loc = (this->instr_operand & 0x00FF);
-	uint8_t msb_loc = (this->instr_operand & 0x00FF) + 1;
+void CPU6502::mod_idry() {
+    uint8_t lsb_loc = (instr_operand & 0x00FF);
+    uint8_t msb_loc = (instr_operand & 0x00FF) + 1;
 
-	uint8_t least_significant_byte = this->cpu_bus->read(lsb_loc);
-	uint8_t most_significant_byte = this->cpu_bus->read(msb_loc);
+    uint8_t least_significant_byte = cpu_bus->read(lsb_loc);
+    uint8_t most_significant_byte = cpu_bus->read(msb_loc);
 
-	this->target_address = ((uint16_t)most_significant_byte << 8) + (uint16_t)least_significant_byte + this->y;
-	this->data_extracted = this->cpu_bus->read(this->target_address);
+    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte + y;
+    data_extracted = cpu_bus->read(target_address);
 }

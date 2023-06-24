@@ -18,13 +18,13 @@ int main()
                 window.close();
         }
 
-        ImGui::SFML::Update(window, clock.restart()); 
-        
-        nes.show_main_menu();
+        ImGui::SFML::Update(window, clock.restart());
 
-        if(nes.is_rom_changed() || nes.ui.is_restart_checked())
+        nes.showMainMenu();
+
+        if(nes.isRomChanged() || nes.ui.is_restart_checked())
         {
-            nes.insert_cartridge_and_power_up(nes.selected_rom_path);
+            nes.insertCartridgeAndPowerUp(nes.selected_rom_path);
             nes.ui.reset_helpers();
         }   
 
