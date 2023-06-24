@@ -340,7 +340,7 @@ ASALocalRun/
 healthchecksdb
 
 # Other
-./.vscode
+.vscode/
 /bin
 cmake-build-debug/
 imgui.ini
