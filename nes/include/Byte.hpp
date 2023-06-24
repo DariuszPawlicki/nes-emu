@@ -2,7 +2,7 @@
 
 
 #include <cstdint>
-#include <math.h>
+#include <cmath>
 
 
 class Byte

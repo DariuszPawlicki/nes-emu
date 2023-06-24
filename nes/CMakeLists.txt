@@ -9,10 +9,13 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(CMAKE_CXX_STANDARD_REQUIRED 1)
 endif()
 
-add_subdirectory(src)
+include(${CMAKE_SOURCE_DIR}/cmake/CMakeUtils.cmake)
+
+set_variables()
+setup_conan()
 
 add_subdirectory(vendor)
+add_subdirectory(src)
 
 add_executable(${CMAKE_PROJECT_NAME} main.cpp)
-
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC imgui-lib nes-emu-lib)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC nes-emu-lib)

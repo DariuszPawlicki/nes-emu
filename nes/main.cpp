@@ -1,7 +1,5 @@
 #include "NESConsole.hpp"
 
-#include <iostream>
-
 
 int main()
 {
@@ -11,7 +9,6 @@ int main()
 	sf::Clock clock;
 
     while (window.isOpen()) {
-        
         sf::Event event;
         
         while (window.pollEvent(event)) {

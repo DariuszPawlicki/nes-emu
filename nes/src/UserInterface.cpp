@@ -51,7 +51,7 @@ void UserInterface::show_main_menu(CpuBus& cpu_bus)
 
         if(this->file_browser.HasSelected())
         {
-            this->selected_rom_path = file_browser.GetSelected();
+            this->selected_rom_path = file_browser.GetSelected().string();
             this->file_browser.ClearSelected();
         }
 

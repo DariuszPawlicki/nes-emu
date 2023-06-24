@@ -1,6 +1,5 @@
 #include "Byte.hpp"
 
-
 void Byte::set_bit(int pos, bool value)
 {
     if(value == true)

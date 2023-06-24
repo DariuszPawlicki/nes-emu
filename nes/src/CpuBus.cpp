@@ -41,8 +41,9 @@ void CpuBus::write(uint16_t address, uint8_t data) // TODO
 
 void CpuBus::insert_cartridge(const std::shared_ptr<Cartridge>& cartridge) 
 { 
-    for(uint8_t& item : this->cpu_ram)
+    for(auto& item : this->cpu_ram) {
         item = 0;
+    }
 
     this->cartridge = cartridge; 
 }

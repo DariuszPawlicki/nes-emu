@@ -37,7 +37,7 @@ class UserInterface
 
         uint16_t breakpoint;
 
-        unsigned int step_num = 1;
+        unsigned int step_num{1};
 
         std::array<uint8_t, 64 * 1024> cpu_mem_layout;
         
