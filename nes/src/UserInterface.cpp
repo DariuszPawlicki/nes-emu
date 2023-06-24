@@ -81,11 +81,11 @@ void UserInterface::show_cpu_debugger(CpuBus& cpu_bus)
     ImGui::Text("ACC: 0x%X\n", cpu.acc);
     ImGui::Text("X: 0x%X", cpu.x);
     ImGui::Text("Y: 0x%X", cpu.y);
-    ImGui::Text("Status Hex Value: 0x%X", status.get_value());
+    ImGui::Text("Status Hex Value: 0x%X", status.getByteValue());
 
-    ImGui::Text("Status Flags Value: N - %d  V - %d  U - %d  B - %d  D - %d  I - %d  Z - %d  C - %d", 
-                status.get_bit(7), status.get_bit(6), status.get_bit(5), status.get_bit(4), 
-                status.get_bit(3), status.get_bit(2), status.get_bit(1), status.get_bit(0));
+    ImGui::Text("Status Flags Value: N - %d  V - %d  U - %d  B - %d  D - %d  I - %d  Z - %d  C - %d",
+                status.getBit(7), status.getBit(6), status.getBit(5), status.getBit(4),
+                status.getBit(3), status.getBit(2), status.getBit(1), status.getBit(0));
 
     ImGui::Separator();
     

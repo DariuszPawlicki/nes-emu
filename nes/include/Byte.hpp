@@ -1,23 +1,16 @@
 #pragma once
 
-
-#include <cstdint>
 #include <cmath>
 
 
 class Byte
 {
-    /* Class for representing status registers
-       for convenient access to certain bit values
-       of specific one byte register. */
-       
-    private:
-        uint8_t value;
-    
-    public:       
-        void set_bit(int pos, bool value);
-        bool get_bit(int pos);
+public:
+    void setBit(int pos, bool new_bit_value);
+    bool getBit(int pos);
+    uint8_t getByteValue();
+    void setByteValue(uint8_t new_byte_value);
 
-        uint8_t get_value();
-        void set_value(uint8_t value);
+private:
+    uint8_t value;
 };

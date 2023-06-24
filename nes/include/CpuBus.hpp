@@ -27,6 +27,6 @@ class CpuBus
 		uint8_t read(uint16_t address);
 		void write(uint16_t address, uint8_t data);
 
-		void insert_cartridge(const std::shared_ptr<Cartridge>& cartridge);
-		void power_up();
+		void insertCartridge(const std::shared_ptr<Cartridge>& cartridge);
+		void powerUp();
 };

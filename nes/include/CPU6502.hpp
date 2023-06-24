@@ -2,15 +2,12 @@
 
 #include "Byte.hpp"
 
-#include <cstdint>
-#include <cstring>
 #include <string>
-#include <unordered_map>
 #include <fstream>
+#include <unordered_map>
 
 
-class CpuBus; // Preventing circular imports
-
+class CpuBus;
 
 class CPU6502
 {
@@ -129,17 +126,17 @@ public:
 
 public:
 
-	void connect_bus(CpuBus* cpu_bus);
-	void power_up();
+	void connectBus(CpuBus* cpu_bus);
+	void powerUp();
 	void cycle();
-	void clear_memory();
+	void clearMemory();
 	void write(uint16_t address, uint8_t data);
 	uint8_t read(uint16_t address);
 	
-	bool extract_flag(Flags flag);
-	void set_flag(Flags flag, bool flag_value);
-	void stack_push(uint8_t data);
-	uint8_t stack_pull();
+	bool extractFlag(Flags flag);
+	void setFlag(Flags flag, bool flag_value);
+	void stackPush(uint8_t data);
+	uint8_t stackPull();
 
 	void reset();
 	void irq();
