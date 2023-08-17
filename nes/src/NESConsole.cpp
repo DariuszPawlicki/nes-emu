@@ -9,7 +9,7 @@ void NESConsole::insertCartridgeAndPowerUp(std::string rom_path) {
 }
 
 bool NESConsole::isRomChanged() {
-    std::string ui_selected_rom_path = ui.getSelectedRomPath();
+    std::string ui_selected_rom_path = nes_console_main_window.getSelectedRomPath();
 
     if (selected_rom_path != ui_selected_rom_path) {
         selected_rom_path = ui_selected_rom_path;
@@ -20,4 +20,4 @@ bool NESConsole::isRomChanged() {
     return false;
 }
 
-void NESConsole::showMainMenu() { ui.showMainMenu(cpu_bus); }
+void NESConsole::showMainMenu() { nes_console_main_window.showMainMenu(cpu_bus); }

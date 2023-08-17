@@ -8,10 +8,10 @@ Cartridge::Cartridge(const std::string& rom_path) {
     if (rom.is_open()) {
         rom_opened_correctly = true;
 
-        uint8_t* header_data = new uint8_t[16];
+        std::array<uint8_t, 16> header_data;
 
         rom.seekg(0);
-        rom.read((char*) header_data, 16);
+        rom.read(reinterpret_cast<char*>(header_data.data()), 16);
 
         for (int i = 0; i < 4; i++) {
             header.nes_const[i] = header_data[i];
@@ -34,8 +34,6 @@ Cartridge::Cartridge(const std::string& rom_path) {
             header.padding[i - 11] = header_data[i];
         }
 
-        delete[] header_data;
-
         if (header.mapper_info1 & 0x04) {
             rom.seekg(512, std::ios_base::cur); // Skipping trainer part if exists
         }
@@ -43,8 +41,8 @@ Cartridge::Cartridge(const std::string& rom_path) {
         prg_rom.resize(16384 * header.prg_rom_size);
         chr_rom.resize(8192 * header.chr_rom_size);
 
-        rom.read((char*) prg_rom.data(), prg_rom.size());
-        rom.read((char*) chr_rom.data(), chr_rom.size());
+        rom.read(reinterpret_cast<char*>(prg_rom.data()), prg_rom.size());
+        rom.read(reinterpret_cast<char*>(chr_rom.data()), chr_rom.size());
 
         rom.close();
 

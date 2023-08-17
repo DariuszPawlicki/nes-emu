@@ -1,9 +1,9 @@
 #include "CPU6502.hpp"
-#include "CpuBus.hpp"
+#include "CPUBus.hpp"
 
 // linijka 3637 - błąd testu
 
-void CPU6502::connectBus(CpuBus *cpu_bus) { cpu_bus = cpu_bus; }
+void CPU6502::connectBus(CPUBus* cpu_bus) { this->cpu_bus = cpu_bus; }
 
 
 void CPU6502::powerUp() {
@@ -11,7 +11,7 @@ void CPU6502::powerUp() {
     //  stored in reset vector
     uint8_t vector_msb = cpu_bus->read(0xFFFD);
 
-    pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+    pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
     status.setByteValue(0x34);
     acc = 0;
     x = 0;
@@ -72,7 +72,7 @@ void CPU6502::stackPush(uint8_t data) {
     --sp;
 }
 
-uint8_t CPU6502::stackPull() {
+uint8_t CPU6502::stackPop() {
     uint8_t data = cpu_bus->read(STACK_BEGINNING + (++sp));
     return data;
 }
@@ -391,14 +391,14 @@ void CPU6502::PHP() {
 }
 
 void CPU6502::PLA() {
-    acc = stackPull();
+    acc = stackPop();
 
     setFlag(Zero, acc == 0);
     setFlag(Negative, acc >= 128);
 }
 
 void CPU6502::PLP() {
-    status.setByteValue(stackPull());
+    status.setByteValue(stackPop());
     setFlag(Unused, true);
 }
 
@@ -443,17 +443,17 @@ void CPU6502::ROR() {
 }
 
 void CPU6502::RTI() {
-    status.setByteValue(stackPull());
+    status.setByteValue(stackPop());
 
     setFlag(Unused, false);
     setFlag(Break, false);
 
-    pc = (uint16_t) stackPull() + ((uint16_t) stackPull() << 8);
+    pc = (uint16_t) stackPop() + ((uint16_t) stackPop() << 8);
 }
 
 void CPU6502::RTS() {
-    pc = (uint16_t) stackPull();
-    pc += ((uint16_t) stackPull() << 8) + 1;
+    pc = (uint16_t) stackPop();
+    pc += ((uint16_t) stackPop() << 8) + 1;
 }
 
 void CPU6502::SBC() {

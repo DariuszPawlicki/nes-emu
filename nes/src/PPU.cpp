@@ -6,7 +6,8 @@ void PPU::ppuWrite(uint16_t address, uint8_t data) {
 
     if (address >= 0x0000 && address <= 0x1FFF) {
 
-    } else if (address >= 0x2000 && address <= 0x3EFF) {
+    }
+    else if (address >= 0x2000 && address <= 0x3EFF) {
 
     }
 }

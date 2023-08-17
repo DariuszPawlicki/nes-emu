@@ -2,6 +2,7 @@
 
 #include "Mapper.hpp"
 
+#include <array>
 #include <vector>
 #include <string>
 #include <fstream>

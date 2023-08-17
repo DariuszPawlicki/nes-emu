@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 
-class CpuBus;
+class CPUBus;
 
 class CPU6502
 {
@@ -65,7 +65,7 @@ public:
 		{ "ZPY", 1 }, { "???", 0 },
 	};
 
-	CpuBus* cpu_bus = nullptr;
+	CPUBus* cpu_bus{nullptr};
 
 	uint16_t instr_operand{ 0 };
 	uint16_t target_address{ 0 };
@@ -126,7 +126,7 @@ public:
 
 public:
 
-	void connectBus(CpuBus* cpu_bus);
+	void connectBus(CPUBus* cpu_bus);
 	void powerUp();
 	void cycle();
 	void clearMemory();
@@ -136,7 +136,7 @@ public:
 	bool extractFlag(Flags flag);
 	void setFlag(Flags flag, bool flag_value);
 	void stackPush(uint8_t data);
-	uint8_t stackPull();
+	uint8_t stackPop();
 
 	void reset();
 	void irq();

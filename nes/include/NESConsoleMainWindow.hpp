@@ -4,7 +4,7 @@
 #include "imgui-SFML.h"
 #include "imfilebrowser.h"
 #include "imgui_memory_editor.h"
-#include "CpuBus.hpp"
+#include "CPUBus.hpp"
 #include "Cartridge.hpp"
 
 #include <iostream>
@@ -17,7 +17,7 @@
 #include <SFML/Window/Event.hpp>
 
 
-class UserInterface
+class NESConsoleMainWindow
 { 
     private:
         // GUI objects       
@@ -29,8 +29,8 @@ class UserInterface
         // Input values and helper variables
         std::string selected_rom_path;
 
-        bool debug_mode = false;
-        bool restart = false;   
+        bool debug_mode{false};
+        bool restart{false};
 
         char breakpoint_str[5];
         char pc_input[5];
@@ -43,18 +43,18 @@ class UserInterface
         
     
     private:
-        void showCpuDebugger(CpuBus& cpu_bus);
+        void showCpuDebugger(CPUBus& cpu_bus);
         void showPpuDebugger(PPU& ppu);
         std::vector<std::string> disassemble(CPU6502& cpu);
 
     public:
         sf::RenderWindow* window;     
 
-        UserInterface();
-        ~UserInterface();
+        NESConsoleMainWindow();
+        ~NESConsoleMainWindow();
 
         std::string getSelectedRomPath();
         bool isRestartChecked();
-        void showMainMenu(CpuBus& cpu_bus);
+        void showMainMenu(CPUBus& cpu_bus);
         void resetHelpers();
 };

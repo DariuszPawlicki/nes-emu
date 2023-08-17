@@ -1,11 +1,11 @@
-#include "CpuBus.hpp"
+#include "CPUBus.hpp"
 
 
-CpuBus::CpuBus() { cpu.connectBus(this); }
+CPUBus::CPUBus() { cpu.connectBus(this); }
 
-void CpuBus::powerUp() { cpu.powerUp(); }
+void CPUBus::powerUp() { cpu.powerUp(); }
 
-uint8_t CpuBus::read(uint16_t address) {
+uint8_t CPUBus::read(uint16_t address) {
     uint8_t data;
 
     if (address >= 0x0000 && address <= 0x1FFF) {// CPU ram
@@ -28,11 +28,25 @@ uint8_t CpuBus::read(uint16_t address) {
     return data;
 }
 
-void CpuBus::write(uint16_t address, uint8_t data) { // TODO
-    cpu_ram[address] = data;
+void CPUBus::write(uint16_t address, uint8_t data) { // TODO
+    if(address >= 0x0000 && address <= 0x1FFF){
+        cpu_ram[address & 0x07FF] = data;
+    }
+    else if (address >= 0x2000 && address <= 0x3FFF) { // PPU registers
+        // data = ppu.cpuRead(address & 0x0007).getByteValue();
+    }
+    else if (address >= 0x4000 && address <= 0x4017) {// APU range
+
+    }
+    else if (address >= 0x4018 && address <= 0x401F) { // APU and I/O functionality that is normally disabled.
+
+    }
+    else { // Cartridge space
+        cartridge->cpuWrite(address, data);
+    }
 }
 
-void CpuBus::insertCartridge(const std::shared_ptr<Cartridge>& cartridge) {
+void CPUBus::insertCartridge(std::shared_ptr<Cartridge> cartridge) {
     for (auto& item: cpu_ram) {
         item = 0;
     }

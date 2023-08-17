@@ -4,7 +4,7 @@
 int main() {
     NESConsole nes;
 
-    sf::RenderWindow& window = *(nes.ui.window);
+    sf::RenderWindow& window = *(nes.nes_console_main_window.window);
     sf::Clock clock;
 
     while (window.isOpen()) {
@@ -21,9 +21,9 @@ int main() {
 
         nes.showMainMenu();
 
-        if (nes.isRomChanged() || nes.ui.isRestartChecked()) {
+        if (nes.isRomChanged() || nes.nes_console_main_window.isRestartChecked()) {
             nes.insertCartridgeAndPowerUp(nes.selected_rom_path);
-            nes.ui.resetHelpers();
+            nes.nes_console_main_window.resetHelpers();
         }
 
         window.clear(sf::Color(102, 102, 255, 255));

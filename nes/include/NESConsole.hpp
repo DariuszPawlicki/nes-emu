@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CpuBus.hpp"
+#include "CPUBus.hpp"
 #include "Cartridge.hpp"
-#include "UserInterface.hpp"
+#include "NESConsoleMainWindow.hpp"
 
 
 class NESConsole {
@@ -11,7 +11,7 @@ public:
     void showMainMenu();
     bool isRomChanged();
 
-    CpuBus cpu_bus;
-    UserInterface ui;
+    CPUBus cpu_bus;
+    NESConsoleMainWindow nes_console_main_window;
     std::string selected_rom_path;
 };

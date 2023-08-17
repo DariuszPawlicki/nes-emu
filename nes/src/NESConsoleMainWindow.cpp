@@ -1,7 +1,7 @@
-#include "UserInterface.hpp"
+#include "NESConsoleMainWindow.hpp"
 
 
-UserInterface::UserInterface() {
+NESConsoleMainWindow::NESConsoleMainWindow() {
     auto height = sf::VideoMode::getDesktopMode().height;
     auto width = sf::VideoMode::getDesktopMode().width;
 
@@ -13,13 +13,13 @@ UserInterface::UserInterface() {
     resetHelpers();
 }
 
-UserInterface::~UserInterface() { delete window; }
+NESConsoleMainWindow::~NESConsoleMainWindow() { delete window; }
 
-std::string UserInterface::getSelectedRomPath() { return selected_rom_path; }
+std::string NESConsoleMainWindow::getSelectedRomPath() { return selected_rom_path; }
 
-bool UserInterface::isRestartChecked() { return restart; }
+bool NESConsoleMainWindow::isRestartChecked() { return restart; }
 
-void UserInterface::showMainMenu(CpuBus& cpu_bus) {
+void NESConsoleMainWindow::showMainMenu(CPUBus& cpu_bus) {
     file_browser.SetTitle("Choose ROM");
     file_browser.SetTypeFilters({".nes"});
 
@@ -58,7 +58,7 @@ void UserInterface::showMainMenu(CpuBus& cpu_bus) {
     }
 }
 
-void UserInterface::showCpuDebugger(CpuBus& cpu_bus) {
+void NESConsoleMainWindow::showCpuDebugger(CPUBus& cpu_bus) {
     CPU6502& cpu = cpu_bus.cpu;
 
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
@@ -81,8 +81,7 @@ void UserInterface::showCpuDebugger(CpuBus& cpu_bus) {
 
     ImGui::Separator();
 
-    std::vector<std::string> disassembled_instructions;
-    disassembled_instructions = disassemble(cpu);
+    std::vector<std::string> disassembled_instructions{disassemble(cpu)};
 
     if (ImGui::BeginTable("Instructions", 1)) {
         for (auto it = disassembled_instructions.begin(); it != disassembled_instructions.end(); it++) {
@@ -149,20 +148,21 @@ void UserInterface::showCpuDebugger(CpuBus& cpu_bus) {
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({652, 19}, ImGuiCond_Once);
 
-    for (int i = 0; i <= 0xFFFF; i++)
+    for (int i = 0; i <= 0xFFFF; i++) {
         cpu_mem_layout[i] = cpu_bus.read(i);
+    }
 
     cpu_mem_edit.DrawWindow("CPU Memory", &cpu_mem_layout, 64 * 1024);
 }
 
-void UserInterface::showPpuDebugger(PPU& ppu) {
+void NESConsoleMainWindow::showPpuDebugger(PPU& ppu) {
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({300, 110}, ImGuiCond_Once);
 
     //ppu_mem_edit.DrawWindow("PPU Memory", ppu.bus.cpu_ram, 16 * 1024);
 }
 
-std::vector<std::string> UserInterface::disassemble(CPU6502& cpu) {
+std::vector<std::string> NESConsoleMainWindow::disassemble(CPU6502& cpu) {
     std::vector<std::string> disassembled_instructions;
 
     uint16_t tmp_pc = cpu.pc;
@@ -191,8 +191,9 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu) {
             dis_instruction << std::setw(2) << (uint16_t) operands.back() << ' ';
         }
 
-        for (int i = 0; i < ((2 - operand_bytes) * 3) + 4; i++)
+        for (int i = 0; i < ((2 - operand_bytes) * 3) + 4; i++) {
             dis_instruction << ' ';
+        }
 
         dis_instruction << instruction.op_name << ' ';
 
@@ -227,7 +228,7 @@ std::vector<std::string> UserInterface::disassemble(CPU6502& cpu) {
     return disassembled_instructions;
 }
 
-void UserInterface::resetHelpers() {
+void NESConsoleMainWindow::resetHelpers() {
     memset(&breakpoint_str, '\0', 4);
     memset(&pc_input, '\0', 4);
     breakpoint = 0;
