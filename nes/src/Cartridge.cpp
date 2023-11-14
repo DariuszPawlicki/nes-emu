@@ -1,5 +1,6 @@
 #include "Cartridge.hpp"
 
+#include <array>
 
 Cartridge::Cartridge(const std::string& rom_path) {
     std::ifstream rom;
@@ -65,4 +66,14 @@ uint8_t Cartridge::cpuRead(uint16_t address) {
     }
 
     return prg_rom[address];
+}
+
+void Cartridge::cpuWrite(uint16_t address, uint8_t data) {
+}
+
+uint8_t Cartridge::ppuRead(uint16_t address) {
+    return {};
+}
+
+void Cartridge::ppuWrite(uint16_t address, uint8_t data) {
 }

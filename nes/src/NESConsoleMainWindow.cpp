@@ -1,19 +1,22 @@
+#include "Cartridge.hpp"
 #include "NESConsoleMainWindow.hpp"
+
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 
 NESConsoleMainWindow::NESConsoleMainWindow() {
-    auto height = sf::VideoMode::getDesktopMode().height;
-    auto width = sf::VideoMode::getDesktopMode().width;
+    auto height{sf::VideoMode::getDesktopMode().height};
+    auto width{sf::VideoMode::getDesktopMode().width};
 
-    window = new sf::RenderWindow(sf::VideoMode(width, height), "NES-EMU");
+    window = std::make_shared<sf::RenderWindow>(sf::VideoMode(width, height), "NES-EMU");
     window->setVerticalSyncEnabled(true);
 
-    ImGui::SFML::Init(*(window));
+    ImGui::SFML::Init(*window);
 
     resetHelpers();
 }
-
-NESConsoleMainWindow::~NESConsoleMainWindow() { delete window; }
 
 std::string NESConsoleMainWindow::getSelectedRomPath() { return selected_rom_path; }
 

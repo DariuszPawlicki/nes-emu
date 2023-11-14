@@ -1,24 +1,30 @@
 #pragma once
 
-#include "imgui.h"
-#include "imgui-SFML.h"
-#include "imfilebrowser.h"
-#include "imgui_memory_editor.h"
-#include "CPUBus.hpp"
-#include "Cartridge.hpp"
+#include <imgui.h>
 
-#include <iostream>
+#include "CPUBus.hpp"
+
 #include <vector>
-#include <sstream>
-#include <iomanip>
 #include <array>
+
+#include <imgui-SFML.h>
+#include <imfilebrowser.h>
+#include <imgui_memory_editor.h>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/System/Clock.hpp>
-#include <SFML/Window/Event.hpp>
 
 
 class NESConsoleMainWindow
-{ 
+{
+    public:
+        std::shared_ptr<sf::RenderWindow> window;
+
+        NESConsoleMainWindow();
+
+        std::string getSelectedRomPath();
+        bool isRestartChecked();
+        void showMainMenu(CPUBus& cpu_bus);
+        void resetHelpers();
+
     private:
         // GUI objects       
         ImGui::FileBrowser file_browser;
@@ -40,21 +46,8 @@ class NESConsoleMainWindow
         unsigned int step_num{1};
 
         std::array<uint8_t, 64 * 1024> cpu_mem_layout;
-        
-    
-    private:
+
         void showCpuDebugger(CPUBus& cpu_bus);
         void showPpuDebugger(PPU& ppu);
         std::vector<std::string> disassemble(CPU6502& cpu);
-
-    public:
-        sf::RenderWindow* window;     
-
-        NESConsoleMainWindow();
-        ~NESConsoleMainWindow();
-
-        std::string getSelectedRomPath();
-        bool isRestartChecked();
-        void showMainMenu(CPUBus& cpu_bus);
-        void resetHelpers();
 };

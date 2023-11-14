@@ -1,5 +1,6 @@
 #include "NESConsole.hpp"
 
+#include <SFML/Window/Event.hpp>
 
 int main() {
     NESConsole nes;
@@ -13,8 +14,9 @@ int main() {
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(event);
 
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
         }
 
         ImGui::SFML::Update(window, clock.restart());

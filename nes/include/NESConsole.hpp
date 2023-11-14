@@ -7,7 +7,7 @@
 
 class NESConsole {
 public:
-    void insertCartridgeAndPowerUp(std::string rom_path);
+    void insertCartridgeAndPowerUp(const std::string& rom_path);
     void showMainMenu();
     bool isRomChanged();
 

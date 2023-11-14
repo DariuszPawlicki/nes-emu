@@ -10,4 +10,5 @@ add_library(nes-emu-lib
         )
 
 target_include_directories(nes-emu-lib PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
 target_link_libraries(nes-emu-lib PUBLIC imgui-lib)

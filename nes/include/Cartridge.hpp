@@ -2,7 +2,6 @@
 
 #include "Mapper.hpp"
 
-#include <array>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -21,7 +20,7 @@ class Cartridge {
     };
 
 public:
-    Cartridge(const std::string& rom_path);
+    explicit Cartridge(const std::string& rom_path);
     uint8_t cpuRead(uint16_t address);
     void cpuWrite(uint16_t address, uint8_t data);
     uint8_t ppuRead(uint16_t address);
