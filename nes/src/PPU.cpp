@@ -1,6 +1,10 @@
 #include "PPU.hpp"
 
 
+void PPU::connectToCartridge(std::shared_ptr<Cartridge> cartridge) {
+    this->cartridge = std::move(cartridge);
+}
+
 void PPU::ppuWrite(uint16_t address, uint8_t data) {
     address &= 0x3FFF;
 

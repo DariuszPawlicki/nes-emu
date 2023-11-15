@@ -1,15 +1,15 @@
+#include "MainBus.hpp"
 #include "CPU6502.hpp"
-#include "CPUBus.hpp"
 
 // linijka 3637 - błąd testu
 
-void CPU6502::connectBus(CPUBus* cpu_bus) { this->cpu_bus = cpu_bus; }
+void CPU6502::connectToBus(std::shared_ptr<MainBus> main_bus) { this->main_bus = std::move(main_bus); }
 
 
 void CPU6502::powerUp() {
-    uint8_t vector_lsb = cpu_bus->read(0xFFFC); // Setting program counter to address
+    uint8_t vector_lsb = main_bus->read(0xFFFC); // Setting program counter to address
     //  stored in reset vector
-    uint8_t vector_msb = cpu_bus->read(0xFFFD);
+    uint8_t vector_msb = main_bus->read(0xFFFD);
 
     pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
     status.setByteValue(0x34);
@@ -17,22 +17,22 @@ void CPU6502::powerUp() {
     x = 0;
     y = 0;
     sp = 0xFD;
-    cpu_bus->write(0x4015, 0);
-    cpu_bus->write(0x4017, 0);
+    main_bus->write(0x4015, 0);
+    main_bus->write(0x4017, 0);
 
     for (int i = 0; i <= 16; ++i) {
-        cpu_bus->write(0x4000 + i, 0);
+        main_bus->write(0x4000 + i, 0);
     }
 
     for (int i = 0; i <= 3; ++i) {
-        cpu_bus->write(0x4010 + i, 0);
+        main_bus->write(0x4010 + i, 0);
     }
 }
 
 
 void CPU6502::cycle() {
     // Fetch
-    instr_opcode = cpu_bus->read(pc);
+    instr_opcode = main_bus->read(pc);
 
     // Decode
     CPU6502::Instruction cur_instruction = op_map[instr_opcode];
@@ -42,13 +42,13 @@ void CPU6502::cycle() {
     ++pc;
 
     if (operand_bytes == 1) {
-        instr_operand = cpu_bus->read(pc);
+        instr_operand = main_bus->read(pc);
         ++pc;
     }
     else if (operand_bytes == 2) {
-        instr_operand = cpu_bus->read(pc);
+        instr_operand = main_bus->read(pc);
         ++pc;
-        instr_operand += cpu_bus->read(pc) << 8;
+        instr_operand += main_bus->read(pc) << 8;
         ++pc;
     }
 
@@ -59,28 +59,28 @@ void CPU6502::cycle() {
 
 void CPU6502::clearMemory() {}
 
-void CPU6502::write(uint16_t address, uint8_t data) { cpu_bus->write(address, data); }
+void CPU6502::write(uint16_t address, uint8_t data) { main_bus->write(address, data); }
 
-uint8_t CPU6502::read(uint16_t address) { return cpu_bus->read(address); }
+uint8_t CPU6502::read(uint16_t address) { return main_bus->read(address); }
 
 bool CPU6502::extractFlag(Flags flag) { return status.getBit(flag); }
 
 void CPU6502::setFlag(Flags flag, bool flag_value) { status.setBit(flag, flag_value); }
 
 void CPU6502::stackPush(uint8_t data) {
-    cpu_bus->write(STACK_BEGINNING + sp, data);
+    main_bus->write(STACK_BEGINNING + sp, data);
     --sp;
 }
 
 uint8_t CPU6502::stackPop() {
-    uint8_t data = cpu_bus->read(STACK_BEGINNING + (++sp));
+    uint8_t data = main_bus->read(STACK_BEGINNING + (++sp));
     return data;
 }
 
 void CPU6502::reset() {
     if (!extractFlag(InterruptDisable)) {
-        uint8_t vector_lsb = cpu_bus->read(0xFFFC);
-        uint8_t vector_msb = cpu_bus->read(0xFFFD);
+        uint8_t vector_lsb = main_bus->read(0xFFFC);
+        uint8_t vector_msb = main_bus->read(0xFFFD);
 
         pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
         setFlag(InterruptDisable, true);
@@ -90,16 +90,16 @@ void CPU6502::reset() {
 
 void CPU6502::irq() {
     if (!extractFlag(InterruptDisable)) {
-        uint8_t vector_lsb = cpu_bus->read(0xFFFE);
-        uint8_t vector_msb = cpu_bus->read(0xFFFF);
+        uint8_t vector_lsb = main_bus->read(0xFFFE);
+        uint8_t vector_msb = main_bus->read(0xFFFF);
 
         pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
     }
 }
 
 void CPU6502::nmi() {
-    uint8_t vector_lsb = cpu_bus->read(0xFFFA);
-    uint8_t vector_msb = cpu_bus->read(0xFFFB);
+    uint8_t vector_lsb = main_bus->read(0xFFFA);
+    uint8_t vector_msb = main_bus->read(0xFFFB);
 
     pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
 }
@@ -138,7 +138,7 @@ void CPU6502::ASL() {
         acc = data_extracted;
     }
     else {
-        cpu_bus->write(target_address, data_extracted);
+        main_bus->write(target_address, data_extracted);
     }
 
     setFlag(Zero, data_extracted == 0);
@@ -196,8 +196,8 @@ void CPU6502::BRK() {
     stackPush((pc >> 8) & 0x00FF);
     stackPush(pc & 0x00FF);
 
-    uint8_t irq_lsb = cpu_bus->read(0xFFFE);
-    uint8_t irq_msb = cpu_bus->read(0xFFFF);
+    uint8_t irq_lsb = main_bus->read(0xFFFE);
+    uint8_t irq_msb = main_bus->read(0xFFFF);
 
     pc = ((uint16_t) irq_msb << 8) + (uint16_t) irq_lsb;
 
@@ -265,7 +265,7 @@ void CPU6502::CPY() {
 void CPU6502::DEC() {
     data_extracted--;
 
-    cpu_bus->write(target_address, data_extracted);
+    main_bus->write(target_address, data_extracted);
 
     setFlag(Zero, data_extracted == 0);
     setFlag(Negative, data_extracted >= 128);
@@ -295,7 +295,7 @@ void CPU6502::EOR() {
 void CPU6502::INC() {
     ++data_extracted;
 
-    cpu_bus->write(target_address, data_extracted);
+    main_bus->write(target_address, data_extracted);
 
     setFlag(Zero, data_extracted == 0);
     setFlag(Negative, data_extracted >= 128);
@@ -358,7 +358,7 @@ void CPU6502::LSR() {
         acc = data_extracted;
     }
     else {
-        cpu_bus->write(target_address, data_extracted);
+        main_bus->write(target_address, data_extracted);
     }
 
     setFlag(Zero, data_extracted == 0);
@@ -415,7 +415,7 @@ void CPU6502::ROL() {
         acc = data_extracted;
     }
     else {
-        cpu_bus->write(target_address, data_extracted);
+        main_bus->write(target_address, data_extracted);
     }
 
     setFlag(Zero, data_extracted == 0);
@@ -435,7 +435,7 @@ void CPU6502::ROR() {
         acc = data_extracted;
     }
     else {
-        cpu_bus->write(target_address, data_extracted);
+        main_bus->write(target_address, data_extracted);
     }
 
     setFlag(Zero, data_extracted == 0);
@@ -487,15 +487,15 @@ void CPU6502::SEI() {
 }
 
 void CPU6502::STA() {
-    cpu_bus->write(target_address, acc);
+    main_bus->write(target_address, acc);
 }
 
 void CPU6502::STX() {
-    cpu_bus->write(target_address, x);
+    main_bus->write(target_address, x);
 }
 
 void CPU6502::STY() {
-    cpu_bus->write(target_address, y);
+    main_bus->write(target_address, y);
 }
 
 void CPU6502::TAX() {
@@ -547,7 +547,7 @@ void CPU6502::LAX() {
 
 void CPU6502::mod_abs() {
     target_address = instr_operand;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_acc() {
@@ -556,27 +556,27 @@ void CPU6502::mod_acc() {
 
 void CPU6502::mod_zp() {
     target_address = (instr_operand & 0x00FF);
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_zpx() {
     target_address = (instr_operand + x) & 0x00FF;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_zpy() {
     target_address = (instr_operand + y) & 0x00FF;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_absx() {
     target_address = instr_operand + x;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_absy() {
     target_address = instr_operand + y;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_imd() {
@@ -593,7 +593,7 @@ void CPU6502::mod_imp() {
 }
 
 void CPU6502::mod_idr() {
-    uint8_t least_significant_byte = cpu_bus->read(instr_operand);
+    uint8_t least_significant_byte = main_bus->read(instr_operand);
     uint8_t most_significant_byte;
 
     /* Implementation of hardware bug. If least significant byte is 0xFF,
@@ -602,10 +602,10 @@ void CPU6502::mod_idr() {
        $02FF and msb is read from $0200 instead of $0300. */
 
     if ((instr_operand & 0x00FF) == 0x00FF) {
-        most_significant_byte = cpu_bus->read(instr_operand & 0xFF00);
+        most_significant_byte = main_bus->read(instr_operand & 0xFF00);
     }
     else {
-        most_significant_byte = cpu_bus->read(instr_operand + 1);
+        most_significant_byte = main_bus->read(instr_operand + 1);
     }
 
     target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
@@ -616,20 +616,20 @@ void CPU6502::mod_idrx() {
     uint8_t lsb_loc = instr_operand + x;
     uint8_t msb_loc = instr_operand + x + 1;
 
-    uint8_t least_significant_byte = cpu_bus->read(lsb_loc);
-    uint8_t most_significant_byte = cpu_bus->read(msb_loc);
+    uint8_t least_significant_byte = main_bus->read(lsb_loc);
+    uint8_t most_significant_byte = main_bus->read(msb_loc);
 
     target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }
 
 void CPU6502::mod_idry() {
     uint8_t lsb_loc = (instr_operand & 0x00FF);
     uint8_t msb_loc = (instr_operand & 0x00FF) + 1;
 
-    uint8_t least_significant_byte = cpu_bus->read(lsb_loc);
-    uint8_t most_significant_byte = cpu_bus->read(msb_loc);
+    uint8_t least_significant_byte = main_bus->read(lsb_loc);
+    uint8_t most_significant_byte = main_bus->read(msb_loc);
 
     target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte + y;
-    data_extracted = cpu_bus->read(target_address);
+    data_extracted = main_bus->read(target_address);
 }

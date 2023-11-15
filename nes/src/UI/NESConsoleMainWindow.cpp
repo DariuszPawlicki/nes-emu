@@ -1,5 +1,5 @@
 #include "Cartridge.hpp"
-#include "NESConsoleMainWindow.hpp"
+#include "UI/NESConsoleMainWindow.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -22,7 +22,7 @@ std::string NESConsoleMainWindow::getSelectedRomPath() { return selected_rom_pat
 
 bool NESConsoleMainWindow::isRestartChecked() { return restart; }
 
-void NESConsoleMainWindow::showMainMenu(CPUBus& cpu_bus) {
+void NESConsoleMainWindow::showMainMenu(MainBus& cpu_bus) {
     file_browser.SetTitle("Choose ROM");
     file_browser.SetTypeFilters({".nes"});
 
@@ -61,7 +61,7 @@ void NESConsoleMainWindow::showMainMenu(CPUBus& cpu_bus) {
     }
 }
 
-void NESConsoleMainWindow::showCpuDebugger(CPUBus& cpu_bus) {
+void NESConsoleMainWindow::showCpuDebugger(MainBus& cpu_bus) {
     CPU6502& cpu = cpu_bus.cpu;
 
     ImGui::SetNextWindowSize({552, 595}, ImGuiCond_Once);
@@ -107,7 +107,7 @@ void NESConsoleMainWindow::showCpuDebugger(CPUBus& cpu_bus) {
 
         break_hex << std::hex << breakpoint_str;
         break_hex >> breakpoint;
-        memset(&breakpoint_str, (int) '\0', 4);
+        std::memset(&breakpoint_str, (int) '\0', 4);
     }
 
     ImGui::SetCursorPos({353, 200});
@@ -120,14 +120,14 @@ void NESConsoleMainWindow::showCpuDebugger(CPUBus& cpu_bus) {
     if (ImGui::Button("Run To Breakpoint", {125, 30})) {
         while (cpu.pc != breakpoint) {
             cpu.cycle();
-            step_num++;
+            ++step_num;
         }
     }
 
     ImGui::SetCursorPos({353, 320});
     if (ImGui::Button("Step", {125, 30})) {
         cpu.cycle();
-        step_num++;
+        ++step_num;
     }
 
     ImGui::PushItemWidth(40);
@@ -140,7 +140,7 @@ void NESConsoleMainWindow::showCpuDebugger(CPUBus& cpu_bus) {
 
         pc_hex << std::hex << pc_input;
         pc_hex >> cpu.pc;
-        memset(&pc_input, (int) '\0', 4);
+        std::memset(&pc_input, (int) '\0', 4);
     }
 
     ImGui::SetCursorPos({393, 25});
@@ -194,7 +194,7 @@ std::vector<std::string> NESConsoleMainWindow::disassemble(CPU6502& cpu) {
             dis_instruction << std::setw(2) << (uint16_t) operands.back() << ' ';
         }
 
-        for (int i = 0; i < ((2 - operand_bytes) * 3) + 4; i++) {
+        for (int i = 0; i < ((2 - operand_bytes) * 3) + 4; ++i) {
             dis_instruction << ' ';
         }
 
@@ -203,10 +203,12 @@ std::vector<std::string> NESConsoleMainWindow::disassemble(CPU6502& cpu) {
         if (operand_bytes > 0) {
             uint16_t full_operand;
 
-            if (operand_bytes == 1)
+            if (operand_bytes == 1) {
                 full_operand = operands[0];
-            else if (operand_bytes == 2)
+            }
+            else if (operand_bytes == 2) {
                 full_operand = ((uint16_t) operands[1] << 8) + (uint16_t) operands[0];
+            }
 
             if (addressing_name == "IMD") // If instruction addressing is immediate then
                 //  print operand in form #$ instead $
@@ -232,8 +234,8 @@ std::vector<std::string> NESConsoleMainWindow::disassemble(CPU6502& cpu) {
 }
 
 void NESConsoleMainWindow::resetHelpers() {
-    memset(&breakpoint_str, '\0', 4);
-    memset(&pc_input, '\0', 4);
+    std::memset(&breakpoint_str, '\0', 4);
+    std::memset(&pc_input, '\0', 4);
     breakpoint = 0;
     step_num = 1;
     restart = false;

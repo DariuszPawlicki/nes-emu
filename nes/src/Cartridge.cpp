@@ -47,7 +47,7 @@ Cartridge::Cartridge(const std::string& rom_path) {
 
         rom.close();
 
-        if (header.prg_rom_size == 1) { // If PRG ROM block count is 1 then, this block is duplicated
+        if (header.prg_rom_size == 1) { // If PRG ROM block count is 1 then this block is duplicated
             prg_rom.insert(prg_rom.end(), prg_rom.begin(), prg_rom.end());
         }
     }

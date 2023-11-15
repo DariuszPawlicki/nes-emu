@@ -1,17 +1,18 @@
 #pragma once
 
-#include "CPUBus.hpp"
-#include "Cartridge.hpp"
-#include "NESConsoleMainWindow.hpp"
+#include "MainBus.hpp"
+#include "UI/NESConsoleMainWindow.hpp"
 
 
 class NESConsole {
-public:
-    void insertCartridgeAndPowerUp(const std::string& rom_path);
-    void showMainMenu();
-    bool isRomChanged();
+    public:
+        NESConsole();
 
-    CPUBus cpu_bus;
-    NESConsoleMainWindow nes_console_main_window;
-    std::string selected_rom_path;
+        void insertCartridgeAndPowerUp(const std::string& rom_path);
+        void showMainMenu();
+        bool isRomChanged();
+
+        std::shared_ptr<MainBus> main_bus;
+        NESConsoleMainWindow nes_console_main_window;
+        std::string selected_rom_path;
 };

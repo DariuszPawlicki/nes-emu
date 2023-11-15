@@ -1,13 +1,13 @@
 add_library(nes-emu-lib
-            Byte.cpp
-            Cartridge.cpp
-            CPU6502.cpp
-            CPUBus.cpp
-            Mapper.cpp
-            NESConsole.cpp
-            PPU.cpp
-            NESConsoleMainWindow.cpp
-        )
+        Byte.cpp
+        Cartridge.cpp
+        CPU6502.cpp
+        PPU.cpp
+        MainBus.cpp
+        Mapper.cpp
+        NESConsole.cpp
+        UI/NESConsoleMainWindow.cpp
+)
 
 target_include_directories(nes-emu-lib PUBLIC ${CMAKE_SOURCE_DIR}/include)
 

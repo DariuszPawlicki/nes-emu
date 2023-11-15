@@ -1,11 +1,14 @@
+#include "Cartridge.hpp"
 #include "NESConsole.hpp"
 
 
-void NESConsole::insertCartridgeAndPowerUp(const std::string& rom_path) {
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>(rom_path);
+NESConsole::NESConsole() : main_bus(std::make_shared<MainBus>()) {
+    main_bus->connectWithCPU();
+}
 
-    cpu_bus.insertCartridge(cartridge);
-    cpu_bus.powerUp();
+void NESConsole::insertCartridgeAndPowerUp(const std::string& rom_path) {
+    main_bus->insertCartridge(std::make_shared<Cartridge>(rom_path));
+    main_bus->powerUp();
 }
 
 bool NESConsole::isRomChanged() {
@@ -20,4 +23,6 @@ bool NESConsole::isRomChanged() {
     return false;
 }
 
-void NESConsole::showMainMenu() { nes_console_main_window.showMainMenu(cpu_bus); }
+void NESConsole::showMainMenu() {
+    nes_console_main_window.showMainMenu(*main_bus);
+}

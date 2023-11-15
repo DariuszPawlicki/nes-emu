@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "CPUBus.hpp"
+#include "MainBus.hpp"
 
 #include <vector>
 #include <array>
@@ -22,7 +22,7 @@ class NESConsoleMainWindow
 
         std::string getSelectedRomPath();
         bool isRestartChecked();
-        void showMainMenu(CPUBus& cpu_bus);
+        void showMainMenu(MainBus& cpu_bus);
         void resetHelpers();
 
     private:
@@ -47,7 +47,7 @@ class NESConsoleMainWindow
 
         std::array<uint8_t, 64 * 1024> cpu_mem_layout;
 
-        void showCpuDebugger(CPUBus& cpu_bus);
+        void showCpuDebugger(MainBus& cpu_bus);
         void showPpuDebugger(PPU& ppu);
         std::vector<std::string> disassemble(CPU6502& cpu);
 };

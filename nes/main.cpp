@@ -2,6 +2,7 @@
 
 #include <SFML/Window/Event.hpp>
 
+
 int main() {
     NESConsole nes;
 
