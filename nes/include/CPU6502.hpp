@@ -7,6 +7,7 @@
 #include <fstream>
 #include <functional>
 #include <unordered_map>
+#include <utility>
 
 
 class MainBus;
@@ -14,6 +15,18 @@ class MainBus;
 class CPU6502 {
     constexpr inline static uint16_t PRG_ROM_BEGINNING{0x8000};
     constexpr inline static uint16_t STACK_BEGINNING{0x0100};
+    constexpr inline static uint16_t NMI_VECTOR_LSB_ADDRESS{0xFFFA};
+    constexpr inline static uint16_t NMI_VECTOR_MSB_ADDRESS{0xFFFB};
+    constexpr inline static uint16_t RESET_VECTOR_LSB_ADDRESS{0xFFFC};
+    constexpr inline static uint16_t RESET_VECTOR_MSB_ADDRESS{0xFFFD};
+    constexpr inline static uint16_t IRQ_BRK_VECTOR_LSB_ADDRESS{0xFFFE};
+    constexpr inline static uint16_t IRQ_BRK_VECTOR_MSB_ADDRESS{0xFFFF};
+    constexpr inline static uint16_t APU_REGISTERS_LOWER_BEGINNING{0x4000};
+    constexpr inline static uint16_t APU_REGISTER_UPPER_BEGINNING{0x4010};
+    constexpr inline static uint16_t APU_CHANNELS_STATE_REGISTER{0x4015};
+    constexpr inline static uint16_t APU_IRQ_MODE_REGSITER{0x4017};
+    constexpr inline static uint8_t STACK_POINTER_INITIAL_POSITION{0xFD};
+    constexpr inline static uint8_t STATUS_REGISTER_INITIAL_VALUE{0x34};
 
 public:
 	enum class AdditionalCycles {
@@ -42,16 +55,16 @@ public:
 
         Instruction() = default;
 
-        Instruction(const std::string& op_name, std::function<void()> operation,
-                    std::function<void()> adr_mod, uint8_t cycles, AdditionalCycles additional_cycle) : op_name(op_name),
-            operation(operation),
-            adr_mod(adr_mod),
+        Instruction(std::string  op_name, std::function<void()> operation,
+                    std::function<void()> adr_mod, uint8_t cycles, AdditionalCycles additional_cycle) : op_name(std::move(op_name)),
+            operation(std::move(operation)),
+            adr_mod(std::move(adr_mod)),
             cycles(cycles), additional_cycle(additional_cycle) {
         }
 
-        Instruction(const std::string& op_name, std::function<void()> operation,
-                    std::function<void()> adr_mod, uint8_t cycles) : op_name(op_name), operation(operation),
-                                                        adr_mod(adr_mod),
+        Instruction(std::string  op_name, std::function<void()> operation,
+                    std::function<void()> adr_mod, uint8_t cycles) : op_name(std::move(op_name)), operation(std::move(operation)),
+                                                        adr_mod(std::move(adr_mod)),
                                                         cycles(cycles), additional_cycle(AdditionalCycles::Default) {
         }
 
@@ -361,7 +374,7 @@ public:
 
     void cycle();
 
-    void write(uint16_t address, uint8_t data);
+    void write(uint16_t address, uint8_t data) const;
 
     [[nodiscard]] uint8_t read(uint16_t address) const;
 

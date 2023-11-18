@@ -1,34 +1,32 @@
 #include "MainBus.hpp"
 #include "CPU6502.hpp"
 
-#include <iostream>
-
 // linijka 3637 - błąd testu
 
 void CPU6502::connectToBus(std::shared_ptr<MainBus> main_bus) { this->main_bus = std::move(main_bus); }
 
 
 void CPU6502::powerUp() {
-    const uint8_t vector_lsb{main_bus->read(0xFFFC)}; // Setting program counter to address
+    const uint8_t vector_lsb{main_bus->read(RESET_VECTOR_LSB_ADDRESS)}; // Setting program counter to address
                                                             //  stored in reset vector
-    const uint8_t vector_msb{main_bus->read(0xFFFD)};
+    const uint8_t vector_msb{main_bus->read(RESET_VECTOR_MSB_ADDRESS)};
 
     pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
     acc = 0;
     x = 0;
     y = 0;
-    sp = 0xFD;
-    status = chips_commons::Register<8>(0x34);
+    sp = STACK_POINTER_INITIAL_POSITION;
+    status = chips_commons::Register<8>(STATUS_REGISTER_INITIAL_VALUE);
 
-    main_bus->write(0x4015, 0);
-    main_bus->write(0x4017, 0);
+    main_bus->write(APU_CHANNELS_STATE_REGISTER, 0);
+    main_bus->write(APU_IRQ_MODE_REGSITER, 0);
 
     for (int i = 0; i <= 16; ++i) {
-        main_bus->write(0x4000 + i, 0);
+        main_bus->write(APU_REGISTERS_LOWER_BEGINNING + i, 0);
     }
 
     for (int i = 0; i <= 3; ++i) {
-        main_bus->write(0x4010 + i, 0);
+        main_bus->write(APU_REGISTER_UPPER_BEGINNING + i, 0);
     }
 }
 
@@ -59,7 +57,7 @@ void CPU6502::cycle() {
     cur_instruction();
 }
 
-void CPU6502::write(uint16_t address, uint8_t data) {
+void CPU6502::write(uint16_t address, uint8_t data) const {
     main_bus->write(address, data);
 }
 
@@ -83,7 +81,7 @@ void CPU6502::stackPush(uint8_t data) {
 }
 
 uint8_t CPU6502::stackPop() {
-    uint8_t data = main_bus->read(STACK_BEGINNING + (++sp));
+    uint8_t data{main_bus->read(STACK_BEGINNING + (++sp))};
     return data;
 }
 
@@ -92,7 +90,7 @@ void CPU6502::reset() {
         uint8_t vector_lsb = main_bus->read(0xFFFC);
         uint8_t vector_msb = main_bus->read(0xFFFD);
 
-        pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+        pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
         setFlag(InterruptDisable, true);
         sp -= 3;
     }
@@ -100,18 +98,18 @@ void CPU6502::reset() {
 
 void CPU6502::irq() {
     if (!extractFlag(InterruptDisable)) {
-        uint8_t vector_lsb = main_bus->read(0xFFFE);
-        uint8_t vector_msb = main_bus->read(0xFFFF);
+        uint8_t vector_lsb = main_bus->read(IRQ_BRK_VECTOR_LSB_ADDRESS);
+        uint8_t vector_msb = main_bus->read(IRQ_BRK_VECTOR_MSB_ADDRESS);
 
-        pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+        pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
     }
 }
 
 void CPU6502::nmi() {
-    uint8_t vector_lsb = main_bus->read(0xFFFA);
-    uint8_t vector_msb = main_bus->read(0xFFFB);
+    uint8_t vector_lsb = main_bus->read(NMI_VECTOR_LSB_ADDRESS);
+    uint8_t vector_msb = main_bus->read(NMI_VECTOR_MSB_ADDRESS);
 
-    pc = (uint16_t) (vector_msb << 8) + (uint16_t) vector_lsb;
+    pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
 }
 
 void CPU6502::ADC() {
@@ -207,10 +205,10 @@ void CPU6502::BRK() {
     stackPush((pc >> 8) & 0x00FF);
     stackPush(pc & 0x00FF);
 
-    uint8_t irq_lsb = main_bus->read(0xFFFE);
-    uint8_t irq_msb = main_bus->read(0xFFFF);
+    uint8_t irq_lsb = main_bus->read(IRQ_BRK_VECTOR_LSB_ADDRESS);
+    uint8_t irq_msb = main_bus->read(IRQ_BRK_VECTOR_MSB_ADDRESS);
 
-    pc = ((uint16_t) irq_msb << 8) + (uint16_t) irq_lsb;
+    pc = static_cast<uint16_t>(irq_msb << 8) + static_cast<uint16_t>(irq_lsb);
 
     setFlag(InterruptDisable, true);
     setFlag(Break, true);
@@ -254,7 +252,7 @@ void CPU6502::CMP() {
 
     setFlag(Carry, acc >= data);
     setFlag(Zero, acc == data);
-    setFlag(Negative, (uint8_t) (acc - data) >= 128);
+    setFlag(Negative, static_cast<uint8_t>(acc - data) >= 128);
 }
 
 void CPU6502::CPX() {
@@ -262,7 +260,7 @@ void CPU6502::CPX() {
 
     setFlag(Carry, x >= data);
     setFlag(Zero, x == data);
-    setFlag(Negative, (uint8_t) (x - data) >= 128);
+    setFlag(Negative, static_cast<uint8_t>(x - data) >= 128);
 }
 
 void CPU6502::CPY() {
@@ -270,7 +268,7 @@ void CPU6502::CPY() {
 
     setFlag(Carry, y >= data);
     setFlag(Zero, y == data);
-    setFlag(Negative, (uint8_t) (y - data) >= 128);
+    setFlag(Negative, static_cast<uint8_t>(y - data) >= 128);
 }
 
 void CPU6502::DEC() {
@@ -624,7 +622,7 @@ void CPU6502::mod_idr() {
         most_significant_byte = main_bus->read(instr_operand + 1);
     }
 
-    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
+    target_address = static_cast<uint16_t>(most_significant_byte << 8) + static_cast<uint16_t>(least_significant_byte);
     instr_operand = target_address;
 }
 
@@ -635,7 +633,7 @@ void CPU6502::mod_idrx() {
     uint8_t least_significant_byte = main_bus->read(lsb_loc);
     uint8_t most_significant_byte = main_bus->read(msb_loc);
 
-    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte;
+    target_address = static_cast<uint16_t>(most_significant_byte << 8) + static_cast<uint16_t>(least_significant_byte);
     data_extracted = main_bus->read(target_address);
 }
 
@@ -646,6 +644,6 @@ void CPU6502::mod_idry() {
     uint8_t least_significant_byte = main_bus->read(lsb_loc);
     uint8_t most_significant_byte = main_bus->read(msb_loc);
 
-    target_address = ((uint16_t) most_significant_byte << 8) + (uint16_t) least_significant_byte + y;
+    target_address = static_cast<uint16_t>(most_significant_byte << 8) + static_cast<uint16_t>(least_significant_byte) + y;
     data_extracted = main_bus->read(target_address);
 }
