@@ -1,5 +1,5 @@
 #include "Cartridge.hpp"
-#include "UI/NESConsoleMainWindow.hpp"
+#include "ui/NESConsoleMainWindow.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -69,25 +69,25 @@ void NESConsoleMainWindow::showCpuDebugger(MainBus& cpu_bus) {
 
     ImGui::Begin("Disassembler");
 
-    Byte status = cpu.status;
+    chips_commons::Register<8> status = cpu.status;
 
     ImGui::Text("PC: 0x%X", cpu.pc);
     ImGui::Text("Stack Pointer: 0x%X", cpu.sp);
     ImGui::Text("ACC: 0x%X\n", cpu.acc);
     ImGui::Text("X: 0x%X", cpu.x);
     ImGui::Text("Y: 0x%X", cpu.y);
-    ImGui::Text("Status Hex Value: 0x%X", status.getByteValue());
+    ImGui::Text("Status Hex Value: 0x%X", status.to_ulong());
 
     ImGui::Text("Status Flags Value: N - %d  V - %d  U - %d  B - %d  D - %d  I - %d  Z - %d  C - %d",
-                status.getBit(7), status.getBit(6), status.getBit(5), status.getBit(4),
-                status.getBit(3), status.getBit(2), status.getBit(1), status.getBit(0));
+                status.test(7), status.test(6), status.test(5), status.test(4),
+                status.test(3), status.test(2), status.test(1), status.test(0));
 
     ImGui::Separator();
 
     std::vector<std::string> disassembled_instructions{disassemble(cpu)};
 
     if (ImGui::BeginTable("Instructions", 1)) {
-        for (auto it = disassembled_instructions.begin(); it != disassembled_instructions.end(); it++) {
+        for (auto it = disassembled_instructions.begin(); it != disassembled_instructions.end(); ++it) {
             std::string decoded = *it;
 
             ImGui::TableNextRow();
@@ -174,10 +174,10 @@ std::vector<std::string> NESConsoleMainWindow::disassemble(CPU6502& cpu) {
         std::stringstream dis_instruction;
 
         uint8_t op_code = cpu.read(tmp_pc);
-        CPU6502::Instruction instruction = cpu.op_map[op_code];
+        CPU6502::Instruction instruction = cpu.op_map.at(op_code);
 
         std::string addressing_name = instruction.op_name.substr(4, instruction.op_name.length());
-        uint8_t operand_bytes = cpu.operand_bytes[addressing_name];
+        uint8_t operand_bytes = cpu.operand_bytes.at(addressing_name);
         std::vector<uint8_t> operands;
 
         dis_instruction << '$' << std::hex << std::setw(4);

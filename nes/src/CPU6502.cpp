@@ -7,16 +7,17 @@ void CPU6502::connectToBus(std::shared_ptr<MainBus> main_bus) { this->main_bus =
 
 
 void CPU6502::powerUp() {
-    uint8_t vector_lsb = main_bus->read(0xFFFC); // Setting program counter to address
-    //  stored in reset vector
-    uint8_t vector_msb = main_bus->read(0xFFFD);
+    const uint8_t vector_lsb{main_bus->read(0xFFFC)}; // Setting program counter to address
+                                                            //  stored in reset vector
+    const uint8_t vector_msb{main_bus->read(0xFFFD)};
 
     pc = static_cast<uint16_t>(vector_msb << 8) + static_cast<uint16_t>(vector_lsb);
-    status.setByteValue(0x34);
     acc = 0;
     x = 0;
     y = 0;
     sp = 0xFD;
+    status = chips_commons::Register<8>(0x34);
+
     main_bus->write(0x4015, 0);
     main_bus->write(0x4017, 0);
 
@@ -35,9 +36,9 @@ void CPU6502::cycle() {
     instr_opcode = main_bus->read(pc);
 
     // Decode
-    CPU6502::Instruction cur_instruction = op_map[instr_opcode];
+    CPU6502::Instruction cur_instruction = op_map.at(instr_opcode);
     std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
-    uint8_t operand_bytes = this->operand_bytes[addressing_name];
+    uint8_t operand_bytes = this->operand_bytes.at(addressing_name);
 
     ++pc;
 
@@ -53,19 +54,27 @@ void CPU6502::cycle() {
     }
 
     // Execute
-    (this->*(cur_instruction.adr_mod))();
-    (this->*(cur_instruction.operation))();
+    cur_instruction.adr_mod();
+    cur_instruction.operation();
 }
 
-void CPU6502::clearMemory() {}
+void CPU6502::write(uint16_t address, uint8_t data) {
+    main_bus->write(address, data);
+}
 
-void CPU6502::write(uint16_t address, uint8_t data) { main_bus->write(address, data); }
+uint8_t CPU6502::read(uint16_t address) const {
+    return main_bus->read(address);
+}
 
-uint8_t CPU6502::read(uint16_t address) { return main_bus->read(address); }
+bool CPU6502::extractFlag(Flags flag) const {
+    auto bit_pos{static_cast<std::size_t>(flag)};
+    return status.test(bit_pos);
+}
 
-bool CPU6502::extractFlag(Flags flag) { return status.getBit(flag); }
-
-void CPU6502::setFlag(Flags flag, bool flag_value) { status.setBit(flag, flag_value); }
+void CPU6502::setFlag(Flags flag, bool flag_value) {
+    auto bit_pos{static_cast<std::size_t>(flag)};
+    status.set(bit_pos, flag_value);
+}
 
 void CPU6502::stackPush(uint8_t data) {
     main_bus->write(STACK_BEGINNING + sp, data);
@@ -134,7 +143,7 @@ void CPU6502::ASL() {
 
     data_extracted <<= 1;
 
-    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+    if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
         acc = data_extracted;
     }
     else {
@@ -205,7 +214,7 @@ void CPU6502::BRK() {
     setFlag(Break, true);
     setFlag(Unused, true);
 
-    stackPush(status.getByteValue());
+    stackPush(static_cast<uint8_t>(status.to_ulong()));
 
     setFlag(Break, false);
 }
@@ -354,7 +363,7 @@ void CPU6502::LSR() {
 
     data_extracted >>= 1;
 
-    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+    if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
         acc = data_extracted;
     }
     else {
@@ -384,7 +393,7 @@ void CPU6502::PHP() {
     setFlag(Unused, true);
     setFlag(Break, true);
 
-    stackPush(status.getByteValue());
+    stackPush(static_cast<uint8_t>(status.to_ulong()));
 
     setFlag(Unused, false);
     setFlag(Break, false);
@@ -398,20 +407,23 @@ void CPU6502::PLA() {
 }
 
 void CPU6502::PLP() {
-    status.setByteValue(stackPop());
+    status = chips_commons::Register<8>(stackPop());
+
     setFlag(Unused, true);
 }
 
 void CPU6502::ROL() {
     bool carry = extractFlag(Carry);
 
-    status.setByteValue(status.getByteValue() & ~0x1);
-    status.setByteValue(status.getByteValue() | (data_extracted & 0x80) >> 7);
+    auto status_register_new_value{static_cast<uint8_t>(status.to_ulong() & ~0x1)};
+    status_register_new_value |= (data_extracted & 0x80) >> 7;
+
+    status = chips_commons::Register<8>(status_register_new_value);
 
     data_extracted <<= 1;
     data_extracted += carry;
 
-    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+    if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
         acc = data_extracted;
     }
     else {
@@ -425,13 +437,15 @@ void CPU6502::ROL() {
 void CPU6502::ROR() {
     bool carry = extractFlag(Carry);
 
-    status.setByteValue(status.getByteValue() & ~0x1);
-    status.setByteValue(status.getByteValue() | (data_extracted & 0x1));
+    auto status_register_new_value{static_cast<uint8_t>(status.to_ulong() & ~0x1)};
+    status_register_new_value |= (data_extracted & 0x1);
+
+    status = chips_commons::Register<8>(status_register_new_value);
 
     data_extracted >>= 1;
     data_extracted |= carry << 7;
 
-    if (op_map[instr_opcode].adr_mod == &CPU6502::mod_acc) {
+    if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
         acc = data_extracted;
     }
     else {
@@ -443,17 +457,17 @@ void CPU6502::ROR() {
 }
 
 void CPU6502::RTI() {
-    status.setByteValue(stackPop());
+    status = chips_commons::Register<8>(stackPop());
 
     setFlag(Unused, false);
     setFlag(Break, false);
 
-    pc = (uint16_t) stackPop() + ((uint16_t) stackPop() << 8);
+    pc = static_cast<uint16_t>(stackPop()) + (static_cast<uint16_t>(stackPop()) << 8);
 }
 
 void CPU6502::RTS() {
-    pc = (uint16_t) stackPop();
-    pc += ((uint16_t) stackPop() << 8) + 1;
+    pc = static_cast<uint16_t>(stackPop());
+    pc += (static_cast<uint16_t>(stackPop()) << 8) + 1;
 }
 
 void CPU6502::SBC() {
@@ -486,15 +500,15 @@ void CPU6502::SEI() {
     setFlag(InterruptDisable, true);
 }
 
-void CPU6502::STA() {
+void CPU6502::STA() const {
     main_bus->write(target_address, acc);
 }
 
-void CPU6502::STX() {
+void CPU6502::STX() const {
     main_bus->write(target_address, x);
 }
 
-void CPU6502::STY() {
+void CPU6502::STY() const {
     main_bus->write(target_address, y);
 }
 
@@ -537,11 +551,11 @@ void CPU6502::TYA() {
     setFlag(Negative, y >= 128);
 }
 
-void CPU6502::UNK() {
+void CPU6502::UNK() const {
     return;
 }
 
-void CPU6502::LAX() {
+void CPU6502::LAX() const {
 
 }
 
@@ -588,12 +602,12 @@ void CPU6502::mod_rel() {
     instr_operand = signed_operand + pc;
 }
 
-void CPU6502::mod_imp() {
+void CPU6502::mod_imp() const {
     return;
 }
 
 void CPU6502::mod_idr() {
-    uint8_t least_significant_byte = main_bus->read(instr_operand);
+    uint8_t least_significant_byte{main_bus->read(instr_operand)};
     uint8_t most_significant_byte;
 
     /* Implementation of hardware bug. If least significant byte is 0xFF,
