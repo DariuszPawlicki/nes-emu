@@ -38,7 +38,7 @@ void CPU6502::cycle() {
     instr_opcode = main_bus->read(pc);
 
     // Decode
-    CPU6502::Instruction cur_instruction = op_map.at(instr_opcode);
+    Instruction cur_instruction = op_map.at(instr_opcode);
     std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
     uint8_t operand_bytes = this->operand_bytes.at(addressing_name);
 
@@ -55,10 +55,10 @@ void CPU6502::cycle() {
         ++pc;
     }
 
+    std::cout << "Current instruction: " << cur_instruction.op_name << '\n';
+
     // Execute
     cur_instruction();
-
-    std::cout << "Count: " << acc_count << '\n';
 }
 
 void CPU6502::write(uint16_t address, uint8_t data) {
@@ -141,13 +141,13 @@ void CPU6502::AND() {
     setFlag(Negative, acc >= 128);
 }
 
+
 void CPU6502::ASL() {
     setFlag(Carry, data_extracted >= 128);
 
     data_extracted <<= 1;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
-        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -368,7 +368,6 @@ void CPU6502::LSR() {
     data_extracted >>= 1;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
-        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -429,7 +428,6 @@ void CPU6502::ROL() {
     data_extracted += carry;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
-        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -452,7 +450,6 @@ void CPU6502::ROR() {
     data_extracted |= carry << 7;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
-        ++acc_count;
         acc = data_extracted;
     }
     else {

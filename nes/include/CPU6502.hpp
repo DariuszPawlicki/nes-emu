@@ -93,8 +93,6 @@ public:
                                       //  N V U B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode,
                                      //   Interrupt disable, Zero flag, Carry flag
 
-    static inline std::size_t acc_count{0};
-
     const std::unordered_map<uint8_t, Instruction> op_map{
 
         {0x69, Instruction("ADC_IMD", [this]{ this->ADC(); }, [this]{ this->mod_imd(); }, 2)},
