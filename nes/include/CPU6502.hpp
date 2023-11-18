@@ -299,7 +299,7 @@ public:
         {0x30, Instruction("BMI_REL", [this]{ this->BMI(); }, [this]{ this->mod_rel(); }, 2, AdditionalCycles::NewPage)},
         {0xAD, Instruction("LDA_ABS", [this]{ this->LDA(); }, [this]{ this->mod_abs(); }, 4)},
         {0x11, Instruction("ORA_IDRY", [this]{ this->ORA(); }, [this]{ this->mod_idry(); }, 5, AdditionalCycles::PageCrossed)},
-        {0xD0, Instruction("BNE_REL", [this]{ this->BMI(); }, [this]{ this->mod_rel(); }, 2, AdditionalCycles::NewPage)},
+        {0xD0, Instruction("BNE_REL", [this]{ this->BNE(); }, [this]{ this->mod_rel(); }, 2, AdditionalCycles::NewPage)},
         {0xC6, Instruction("DEC_ZP", [this]{ this->DEC(); }, [this]{ this->mod_zp(); }, 5)},
         {0xBD, Instruction("LDA_ABSX", [this]{ this->LDA(); }, [this]{ this->mod_absx(); }, 4, AdditionalCycles::PageCrossed)},
         {0x85, Instruction("STA_ZP", [this]{ this->STA(); }, [this]{ this->mod_zp(); }, 3)},

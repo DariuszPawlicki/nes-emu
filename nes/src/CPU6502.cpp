@@ -55,8 +55,6 @@ void CPU6502::cycle() {
         ++pc;
     }
 
-    std::cout << "Current instruction: " << cur_instruction.op_name << '\n';
-
     // Execute
     cur_instruction();
 }
