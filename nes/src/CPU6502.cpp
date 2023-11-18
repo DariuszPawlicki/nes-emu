@@ -1,6 +1,8 @@
 #include "MainBus.hpp"
 #include "CPU6502.hpp"
 
+#include <iostream>
+
 // linijka 3637 - błąd testu
 
 void CPU6502::connectToBus(std::shared_ptr<MainBus> main_bus) { this->main_bus = std::move(main_bus); }
@@ -54,8 +56,9 @@ void CPU6502::cycle() {
     }
 
     // Execute
-    cur_instruction.adr_mod();
-    cur_instruction.operation();
+    cur_instruction();
+
+    std::cout << "Count: " << acc_count << '\n';
 }
 
 void CPU6502::write(uint16_t address, uint8_t data) {
@@ -144,6 +147,7 @@ void CPU6502::ASL() {
     data_extracted <<= 1;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
+        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -364,6 +368,7 @@ void CPU6502::LSR() {
     data_extracted >>= 1;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
+        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -424,6 +429,7 @@ void CPU6502::ROL() {
     data_extracted += carry;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
+        ++acc_count;
         acc = data_extracted;
     }
     else {
@@ -446,6 +452,7 @@ void CPU6502::ROR() {
     data_extracted |= carry << 7;
 
     if (op_map.at(instr_opcode).getAddressingModeName() == "ACC") {
+        ++acc_count;
         acc = data_extracted;
     }
     else {

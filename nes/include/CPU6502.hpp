@@ -3,7 +3,6 @@
 #include "utils/ChipsCommons.hpp"
 
 #include <string>
-#include <ranges>
 #include <cstdint>
 #include <fstream>
 #include <functional>
@@ -56,7 +55,12 @@ public:
                                                         cycles(cycles), additional_cycle(AdditionalCycles::Default) {
         }
 
-        std::string_view getAddressingModeName() const {
+        void operator()() const {
+            adr_mod();
+            operation();
+        }
+
+        std::string getAddressingModeName() const {
             auto separator_pos{op_name.find('_')};
             return op_name.substr(separator_pos + 1);
         }
@@ -88,6 +92,8 @@ public:
     chips_commons::Register<8> status; // Processor status flags - starting from most significant bit -
                                       //  N V U B D I Z C - Negative, Overflow, Unused, Break cmd, Decimal mode,
                                      //   Interrupt disable, Zero flag, Carry flag
+
+    static inline std::size_t acc_count{0};
 
     const std::unordered_map<uint8_t, Instruction> op_map{
 
