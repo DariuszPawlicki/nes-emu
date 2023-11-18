@@ -7,7 +7,6 @@
 #include <fstream>
 #include <functional>
 #include <unordered_map>
-#include <utility>
 
 
 class MainBus;
@@ -55,18 +54,16 @@ public:
 
         Instruction() = default;
 
-        Instruction(std::string  op_name, std::function<void()> operation,
+        Instruction(std::string op_name, std::function<void()> operation,
                     std::function<void()> adr_mod, uint8_t cycles, AdditionalCycles additional_cycle) : op_name(std::move(op_name)),
             operation(std::move(operation)),
             adr_mod(std::move(adr_mod)),
-            cycles(cycles), additional_cycle(additional_cycle) {
-        }
+            cycles(cycles), additional_cycle(additional_cycle) {}
 
         Instruction(std::string  op_name, std::function<void()> operation,
                     std::function<void()> adr_mod, uint8_t cycles) : op_name(std::move(op_name)), operation(std::move(operation)),
                                                         adr_mod(std::move(adr_mod)),
-                                                        cycles(cycles), additional_cycle(AdditionalCycles::Default) {
-        }
+                                                        cycles(cycles), additional_cycle(AdditionalCycles::Default) {}
 
         void operator()() const {
             adr_mod();
@@ -474,7 +471,7 @@ public:
     void LSR(); // Shift right of accumulator or memory, carry flag = content of old bit 0,
     // zero flag = 1 if result is 0, negative flag = 1 if bit 7 is set to 1
 
-    void NOP(); // No operation, increments PC += 2
+    void NOP() const; // No operation, increments PC += 2
 
     void ORA(); // OR performed on accumulator with value from memory, zero flag = 1 if a = 0,
     // negative flag = 1 if bit 7 is set to 1

@@ -36,9 +36,8 @@ void CPU6502::cycle() {
     instr_opcode = main_bus->read(pc);
 
     // Decode
-    Instruction cur_instruction = op_map.at(instr_opcode);
-    std::string addressing_name = cur_instruction.op_name.substr(4, cur_instruction.op_name.length());
-    uint8_t operand_bytes = this->operand_bytes.at(addressing_name);
+    const Instruction& cur_instruction{op_map.at(instr_opcode)};
+    uint8_t operand_bytes{this->operand_bytes.at(cur_instruction.getAddressingModeName())};
 
     ++pc;
 
@@ -272,7 +271,7 @@ void CPU6502::CPY() {
 }
 
 void CPU6502::DEC() {
-    data_extracted--;
+    --data_extracted;
 
     main_bus->write(target_address, data_extracted);
 
@@ -374,7 +373,7 @@ void CPU6502::LSR() {
     setFlag(Negative, data_extracted >= 128);
 }
 
-void CPU6502::NOP() {
+void CPU6502::NOP() const {
     return;
 }
 
