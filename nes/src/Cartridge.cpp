@@ -2,6 +2,7 @@
 
 #include <array>
 
+
 Cartridge::Cartridge(const std::string& rom_path) {
     std::ifstream rom;
     rom.open(rom_path, std::ios::binary);

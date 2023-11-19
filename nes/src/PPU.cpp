@@ -16,7 +16,7 @@ void PPU::ppuWrite(uint16_t address, uint8_t data) {
     }
 }
 
-uint8_t PPU::ppuRead(uint16_t address) {
+uint8_t PPU::ppuRead(uint16_t address) const {
     address &= 0x3FFF;
 
     uint8_t data{0};
@@ -26,13 +26,11 @@ uint8_t PPU::ppuRead(uint16_t address) {
 }
 
 void PPU::cpuWrite(uint16_t address, uint8_t data) {
-    address &= 0x0007;
-
-
+    auto& [ppu_register_name, ppu_register]{ppu_registers.at(address)};
+    ppu_register = chips_commons::Register<8>(data);
 }
 
-uint8_t PPU::cpuRead(uint16_t address) {
-    uint8_t data{0};
-
-    return data;
+uint8_t PPU::cpuRead(uint16_t address) const {
+    auto& [ppu_register_name, ppu_register]{ppu_registers.at(address)};
+    return ppu_register.to_ulong();
 }

@@ -16,8 +16,10 @@ uint8_t MainBus::read(uint16_t address) const {
     }
     else if (address >= 0x2000 && address <= 0x3FFF) {
         // PPU registers
-        // data = ppu.cpuRead(address & 0x0007).getByteValue();
-        data = 0;
+        data = ppu.cpuRead(address & 0x2007);
+    }
+    else if(address == 0x4014) {
+        data = ppu.cpuRead(address);
     }
     else if (address >= 0x4000 && address <= 0x4017) {
         // APU range
@@ -42,7 +44,10 @@ void MainBus::write(uint16_t address, uint8_t data) {
     }
     else if (address >= 0x2000 && address <= 0x3FFF) {
         // PPU registers
-        // data = ppu.cpuRead(address & 0x0007).getByteValue();
+        ppu.cpuWrite(address & 0x2007, data);
+    }
+    else if (address == 0x4014) {
+        ppu.cpuWrite(address, data);
     }
     else if (address >= 0x4000 && address <= 0x4017) {
         // APU range
