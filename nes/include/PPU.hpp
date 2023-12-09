@@ -23,16 +23,26 @@ public:
     std::shared_ptr<Cartridge> cartridge;
 
 private:
+    constexpr inline static uint16_t PPUCTRL_REGISTER_ADDRESS{0x2000};
+    constexpr inline static uint16_t PPUMASK_REGISTER_ADDRESS{0x2001};
+    constexpr inline static uint16_t PPUSTATUS_REGISTER_ADDRESS{0x2002};
+    constexpr inline static uint16_t OAMADDR_REGISTER_ADDRESS{0x2003};
+    constexpr inline static uint16_t OAMDATA_REGISTER_ADDRESS{0x2004};
+    constexpr inline static uint16_t PPUSCROLL_REGISTER_ADDRESS{0x2005};
+    constexpr inline static uint16_t PPUADDR_REGISTER_ADDRESS{0x2006};
+    constexpr inline static uint16_t PPUDATA_REGISTER_ADDRESS{0x2007};
+    constexpr inline static uint16_t OAMDMA_REGISTER_ADDRESS{0x4014};
+
     std::unordered_map<uint16_t, std::pair<std::string, chips_commons::Register<8>>> ppu_registers {
-        {0x2000, {"PPUCTRL", {}}},
-        {0x2001, {"PPUMASK", {}}},
-        {0x2002, {"PPUSTATUS", {}}},
-        {0x2003, {"OAMADDR", {}}},
-        {0x2004, {"OAMDATA", {}}},
-        {0x2005, {"PPUSCROLL", {}}},
-        {0x2006, {"PPUADDR", {}}},
-        {0x2007, {"PPUDATA", {}}},
-        {0x4014, {"OAMDMA", {}}}
+        {PPUCTRL_REGISTER_ADDRESS, {"PPUCTRL", {}}},
+        {PPUMASK_REGISTER_ADDRESS, {"PPUMASK", {}}},
+        {PPUSTATUS_REGISTER_ADDRESS, {"PPUSTATUS", {}}},
+        {OAMADDR_REGISTER_ADDRESS, {"OAMADDR", {}}},
+        {OAMDATA_REGISTER_ADDRESS, {"OAMDATA", {}}},
+        {PPUSCROLL_REGISTER_ADDRESS, {"PPUSCROLL", {}}},
+        {PPUADDR_REGISTER_ADDRESS, {"PPUADDR", {}}},
+        {PPUDATA_REGISTER_ADDRESS, {"PPUDATA", {}}},
+        {OAMDMA_REGISTER_ADDRESS, {"OAMDMA", {}}}
     };
 
     std::array<uint8_t, 2 * 1024> name_table{};

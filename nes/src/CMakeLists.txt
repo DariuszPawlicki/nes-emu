@@ -3,7 +3,7 @@ add_library(nes-emu-lib
         CPU6502.cpp
         PPU.cpp
         MainBus.cpp
-        Mapper.cpp
+        mappers/Mapper.cpp
         NESConsole.cpp
         ui/NESConsoleMainWindow.cpp
 )

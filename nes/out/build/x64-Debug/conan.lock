@@ -1,0 +1,124 @@
+{
+ "graph_lock": {
+  "nodes": {
+   "0": {
+    "options": "brotli:enable_debug=False\nbrotli:enable_log=False\nbrotli:enable_portable=False\nbrotli:enable_rbit=True\nbrotli:endianness=None\nbrotli:shared=False\nbrotli:target_bits=None\nbzip2:build_executable=True\nbzip2:shared=False\nflac:shared=False\nfreetype:shared=False\nfreetype:subpixel=False\nfreetype:with_brotli=True\nfreetype:with_bzip2=True\nfreetype:with_png=True\nfreetype:with_zlib=True\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nogg:shared=False\nopenal-soft:shared=False\nsfml:audio=True\nsfml:graphics=True\nsfml:network=True\nsfml:shared=False\nsfml:window=True\nstb:with_deprecated=True\nvorbis:shared=False\nzlib:shared=False",
+    "requires": [
+     "1"
+    ],
+    "path": "..\\..\\..\\conanfile.py",
+    "context": "host"
+   },
+   "1": {
+    "ref": "sfml/2.5.1",
+    "options": "audio=True\ngraphics=True\nnetwork=True\nshared=False\nwindow=True\nbrotli:enable_debug=False\nbrotli:enable_log=False\nbrotli:enable_portable=False\nbrotli:enable_rbit=True\nbrotli:endianness=None\nbrotli:shared=False\nbrotli:target_bits=None\nbzip2:build_executable=True\nbzip2:shared=False\nflac:shared=False\nfreetype:shared=False\nfreetype:subpixel=False\nfreetype:with_brotli=True\nfreetype:with_bzip2=True\nfreetype:with_png=True\nfreetype:with_zlib=True\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nogg:shared=False\nopenal-soft:shared=False\nstb:with_deprecated=True\nvorbis:shared=False\nzlib:shared=False",
+    "package_id": "a8d21d2d2792fdf49aae6441b1e689b376e4f0e0",
+    "prev": "0",
+    "requires": [
+     "2",
+     "3",
+     "8",
+     "9",
+     "11",
+     "12"
+    ],
+    "context": "host"
+   },
+   "2": {
+    "ref": "opengl/system",
+    "options": "",
+    "package_id": "5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9",
+    "prev": "0",
+    "context": "host"
+   },
+   "3": {
+    "ref": "freetype/2.13.0",
+    "options": "shared=False\nsubpixel=False\nwith_brotli=True\nwith_bzip2=True\nwith_png=True\nwith_zlib=True\nbrotli:enable_debug=False\nbrotli:enable_log=False\nbrotli:enable_portable=False\nbrotli:enable_rbit=True\nbrotli:endianness=None\nbrotli:shared=False\nbrotli:target_bits=None\nbzip2:build_executable=True\nbzip2:shared=False\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nzlib:shared=False",
+    "package_id": "c4ca976bc1c6492af3efa84fc6f6461f87f0427c",
+    "prev": "0",
+    "requires": [
+     "4",
+     "5",
+     "6",
+     "7"
+    ],
+    "context": "host"
+   },
+   "4": {
+    "ref": "libpng/1.6.39",
+    "options": "api_prefix=\nshared=False\nsse=True\nzlib:shared=False",
+    "package_id": "d16518e542c3c6c90681c55aae54dd4ee2ca8000",
+    "prev": "0",
+    "requires": [
+     "5"
+    ],
+    "context": "host"
+   },
+   "5": {
+    "ref": "zlib/1.2.13",
+    "options": "shared=False",
+    "package_id": "164640aad040835ac89882393a96d89200694f04",
+    "prev": "0",
+    "context": "host"
+   },
+   "6": {
+    "ref": "bzip2/1.0.8",
+    "options": "build_executable=True\nshared=False",
+    "package_id": "d74f69022acf854c1ce6f27efa07ccbb6504e4b1",
+    "prev": "0",
+    "context": "host"
+   },
+   "7": {
+    "ref": "brotli/1.0.9",
+    "options": "enable_debug=False\nenable_log=False\nenable_portable=False\nenable_rbit=True\nendianness=None\nshared=False\ntarget_bits=None",
+    "package_id": "711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3",
+    "prev": "0",
+    "context": "host"
+   },
+   "8": {
+    "ref": "stb/cci.20220909",
+    "options": "with_deprecated=True",
+    "package_id": "5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9",
+    "prev": "0",
+    "context": "host"
+   },
+   "9": {
+    "ref": "flac/1.4.2",
+    "options": "shared=False\nogg:shared=False",
+    "package_id": "49f5cfddc9c70260d199e6a6094c4587d934bfa6",
+    "prev": "0",
+    "requires": [
+     "10"
+    ],
+    "context": "host"
+   },
+   "10": {
+    "ref": "ogg/1.3.5",
+    "options": "shared=False",
+    "package_id": "164640aad040835ac89882393a96d89200694f04",
+    "prev": "0",
+    "context": "host"
+   },
+   "11": {
+    "ref": "openal-soft/1.22.2",
+    "options": "shared=False",
+    "package_id": "164640aad040835ac89882393a96d89200694f04",
+    "prev": "0",
+    "context": "host"
+   },
+   "12": {
+    "ref": "vorbis/1.3.7",
+    "options": "shared=False\nogg:shared=False",
+    "package_id": "49f5cfddc9c70260d199e6a6094c4587d934bfa6",
+    "prev": "0",
+    "requires": [
+     "10"
+    ],
+    "context": "host"
+   }
+  },
+  "revisions_enabled": false
+ },
+ "version": "0.4",
+ "profile_host": "[settings]\narch=x86_64\narch_build=x86_64\nbuild_type=Debug\ncompiler=Visual Studio\ncompiler.runtime=MDd\ncompiler.version=17\nos=Windows\nos_build=Windows\n[options]\n[build_requires]\n[env]\n"
+}

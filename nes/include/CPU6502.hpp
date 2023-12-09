@@ -12,21 +12,6 @@
 class MainBus;
 
 class CPU6502 {
-    constexpr inline static uint16_t PRG_ROM_BEGINNING{0x8000};
-    constexpr inline static uint16_t STACK_BEGINNING{0x0100};
-    constexpr inline static uint16_t NMI_VECTOR_LSB_ADDRESS{0xFFFA};
-    constexpr inline static uint16_t NMI_VECTOR_MSB_ADDRESS{0xFFFB};
-    constexpr inline static uint16_t RESET_VECTOR_LSB_ADDRESS{0xFFFC};
-    constexpr inline static uint16_t RESET_VECTOR_MSB_ADDRESS{0xFFFD};
-    constexpr inline static uint16_t IRQ_BRK_VECTOR_LSB_ADDRESS{0xFFFE};
-    constexpr inline static uint16_t IRQ_BRK_VECTOR_MSB_ADDRESS{0xFFFF};
-    constexpr inline static uint16_t APU_REGISTERS_LOWER_BEGINNING{0x4000};
-    constexpr inline static uint16_t APU_REGISTER_UPPER_BEGINNING{0x4010};
-    constexpr inline static uint16_t APU_CHANNELS_STATE_REGISTER{0x4015};
-    constexpr inline static uint16_t APU_IRQ_MODE_REGSITER{0x4017};
-    constexpr inline static uint8_t STACK_POINTER_INITIAL_POSITION{0xFD};
-    constexpr inline static uint8_t STATUS_REGISTER_INITIAL_VALUE{0x34};
-
 public:
 	enum class AdditionalCycles {
 		Default,
@@ -75,6 +60,21 @@ public:
             return op_name.substr(separator_pos + 1);
         }
     };
+
+    constexpr inline static uint16_t PRG_ROM_BEGINNING{0x8000};
+    constexpr inline static uint16_t STACK_BEGINNING{0x0100};
+    constexpr inline static uint16_t NMI_VECTOR_LSB_ADDRESS{0xFFFA};
+    constexpr inline static uint16_t NMI_VECTOR_MSB_ADDRESS{0xFFFB};
+    constexpr inline static uint16_t RESET_VECTOR_LSB_ADDRESS{0xFFFC};
+    constexpr inline static uint16_t RESET_VECTOR_MSB_ADDRESS{0xFFFD};
+    constexpr inline static uint16_t IRQ_BRK_VECTOR_LSB_ADDRESS{0xFFFE};
+    constexpr inline static uint16_t IRQ_BRK_VECTOR_MSB_ADDRESS{0xFFFF};
+    constexpr inline static uint16_t APU_REGISTERS_LOWER_BEGINNING{0x4000};
+    constexpr inline static uint16_t APU_REGISTER_UPPER_BEGINNING{0x4010};
+    constexpr inline static uint16_t APU_CHANNELS_STATE_REGISTER{0x4015};
+    constexpr inline static uint16_t APU_IRQ_MODE_REGSITER{0x4017};
+    constexpr inline static uint8_t STACK_POINTER_INITIAL_POSITION{0xFD};
+    constexpr inline static uint8_t STATUS_REGISTER_INITIAL_VALUE{0x34};
 
     const std::unordered_map<std::string, uint8_t> operand_bytes{
         {"IMD", 1}, {"ZP", 1}, {"ZPX", 1},

@@ -1,0 +1,314 @@
+{
+	"archive" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64",
+				"role" : "flags"
+			}
+		]
+	},
+	"artifacts" : 
+	[
+		{
+			"path" : "lib/imgui-lib.lib"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"add_compile_options",
+			"conan_global_flags",
+			"conan_basic_setup",
+			"conan_cmake_run",
+			"setup_conan",
+			"target_link_libraries",
+			"conan_target_link_libraries",
+			"target_include_directories",
+			"include_directories"
+		],
+		"files" : 
+		[
+			"vendor/imgui/src/CMakeLists.txt",
+			"CMakeLists.txt",
+			"out/build/x64-Debug/conanbuildinfo.cmake",
+			"out/build/x64-Debug/conan/conan.cmake",
+			"cmake/CMakeUtils.cmake",
+			"vendor/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 1,
+				"parent" : 0
+			},
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 6,
+				"parent" : 2
+			},
+			{
+				"command" : 5,
+				"file" : 1,
+				"line" : 15,
+				"parent" : 2
+			},
+			{
+				"command" : 4,
+				"file" : 4,
+				"line" : 8,
+				"parent" : 4
+			},
+			{
+				"command" : 3,
+				"file" : 3,
+				"line" : 935,
+				"parent" : 5
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 1449,
+				"parent" : 6
+			},
+			{
+				"command" : 1,
+				"file" : 2,
+				"line" : 1963,
+				"parent" : 7
+			},
+			{
+				"file" : 5
+			},
+			{
+				"command" : 7,
+				"file" : 5,
+				"line" : 4,
+				"parent" : 9
+			},
+			{
+				"command" : 6,
+				"file" : 2,
+				"line" : 1978,
+				"parent" : 10
+			},
+			{
+				"command" : 8,
+				"file" : 5,
+				"line" : 3,
+				"parent" : 9
+			},
+			{
+				"command" : 9,
+				"file" : 2,
+				"line" : 1945,
+				"parent" : 7
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc     /Zi /Ob0 /Od /RTC1  -MDd"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "/std:c++latest"
+				},
+				{
+					"backtrace" : 8,
+					"fragment" : "-DAL_LIBTYPE_STATIC"
+				},
+				{
+					"backtrace" : 8,
+					"fragment" : "-DFLAC__NO_DLL"
+				},
+				{
+					"backtrace" : 8,
+					"fragment" : "-DSTB_TEXTEDIT_KEYTYPE=unsigned"
+				},
+				{
+					"backtrace" : 8,
+					"fragment" : "-DSFML_STATIC"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 11,
+					"define" : "AL_LIBTYPE_STATIC"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "FLAC__NO_DLL"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "SFML_STATIC"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "STB_TEXTEDIT_KEYTYPE=unsigned"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 12,
+					"path" : "C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/vendor/imgui/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/sfml/2.5.1/_/_/package/a8d21d2d2792fdf49aae6441b1e689b376e4f0e0/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/freetype/2.13.0/_/_/package/c4ca976bc1c6492af3efa84fc6f6461f87f0427c/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/freetype/2.13.0/_/_/package/c4ca976bc1c6492af3efa84fc6f6461f87f0427c/include/freetype2"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/stb/cci.20220909/_/_/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/flac/1.4.2/_/_/package/49f5cfddc9c70260d199e6a6094c4587d934bfa6/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/openal-soft/1.22.2/_/_/package/164640aad040835ac89882393a96d89200694f04/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/openal-soft/1.22.2/_/_/package/164640aad040835ac89882393a96d89200694f04/include/AL"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/vorbis/1.3.7/_/_/package/49f5cfddc9c70260d199e6a6094c4587d934bfa6/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/libpng/1.6.39/_/_/package/d16518e542c3c6c90681c55aae54dd4ee2ca8000/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/bzip2/1.0.8/_/_/package/d74f69022acf854c1ce6f27efa07ccbb6504e4b1/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/brotli/1.0.9/_/_/package/711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/brotli/1.0.9/_/_/package/711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3/include/brotli"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/ogg/1.3.5/_/_/package/164640aad040835ac89882393a96d89200694f04/include"
+				},
+				{
+					"backtrace" : 13,
+					"isSystem" : true,
+					"path" : "C:/Users/Darek/.conan/data/zlib/1.2.13/_/_/package/164640aad040835ac89882393a96d89200694f04/include"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4
+			]
+		}
+	],
+	"id" : "imgui-lib::@3d36d253ea4da369a77d",
+	"name" : "imgui-lib",
+	"nameOnDisk" : "imgui-lib.lib",
+	"paths" : 
+	{
+		"build" : "vendor/imgui/src",
+		"source" : "vendor/imgui/src"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "vendor/imgui/src/imgui.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "vendor/imgui/src/imgui-SFML.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "vendor/imgui/src/imgui_draw.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "vendor/imgui/src/imgui_tables.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "vendor/imgui/src/imgui_widgets.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

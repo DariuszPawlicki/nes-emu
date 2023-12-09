@@ -1,0 +1,13 @@
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/CMakeFiles/NesEmulator.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/CMakeFiles/edit_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/CMakeFiles/rebuild_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/imgui/CMakeFiles/edit_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/imgui/CMakeFiles/rebuild_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/imgui/src/CMakeFiles/imgui-lib.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/imgui/src/CMakeFiles/edit_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/vendor/imgui/src/CMakeFiles/rebuild_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/src/CMakeFiles/nes-emu-lib.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/src/CMakeFiles/edit_cache.dir
+C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug/src/CMakeFiles/rebuild_cache.dir

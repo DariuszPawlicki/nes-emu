@@ -1,0 +1,72 @@
+[settings]
+    arch=x86_64
+    build_type=Debug
+    compiler=Visual Studio
+    compiler.runtime=MDd
+    compiler.version=17
+    os=Windows
+
+[requires]
+    sfml/2.Y.Z
+
+[options]
+
+
+[full_settings]
+    arch=x86_64
+    build_type=Debug
+    compiler=Visual Studio
+    compiler.runtime=MDd
+    compiler.version=17
+    os=Windows
+
+[full_requires]
+    brotli/1.0.9:711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3
+    bzip2/1.0.8:d74f69022acf854c1ce6f27efa07ccbb6504e4b1
+    flac/1.4.2:49f5cfddc9c70260d199e6a6094c4587d934bfa6
+    freetype/2.13.0:c4ca976bc1c6492af3efa84fc6f6461f87f0427c
+    libpng/1.6.39:d16518e542c3c6c90681c55aae54dd4ee2ca8000
+    ogg/1.3.5:164640aad040835ac89882393a96d89200694f04
+    openal-soft/1.22.2:164640aad040835ac89882393a96d89200694f04
+    opengl/system:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    sfml/2.5.1:a8d21d2d2792fdf49aae6441b1e689b376e4f0e0
+    stb/cci.20220909:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    vorbis/1.3.7:49f5cfddc9c70260d199e6a6094c4587d934bfa6
+    zlib/1.2.13:164640aad040835ac89882393a96d89200694f04
+
+[full_options]
+    brotli:enable_debug=False
+    brotli:enable_log=False
+    brotli:enable_portable=False
+    brotli:enable_rbit=True
+    brotli:endianness=None
+    brotli:shared=False
+    brotli:target_bits=None
+    bzip2:build_executable=True
+    bzip2:shared=False
+    flac:shared=False
+    freetype:shared=False
+    freetype:subpixel=False
+    freetype:with_brotli=True
+    freetype:with_bzip2=True
+    freetype:with_png=True
+    freetype:with_zlib=True
+    libpng:api_prefix=
+    libpng:shared=False
+    libpng:sse=True
+    ogg:shared=False
+    openal-soft:shared=False
+    sfml:audio=True
+    sfml:graphics=True
+    sfml:network=True
+    sfml:shared=False
+    sfml:window=True
+    stb:with_deprecated=True
+    vorbis:shared=False
+    zlib:shared=False
+
+[recipe_hash]
+
+
+[env]
+

@@ -1,0 +1,145 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "vendor",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-vendor-Debug-fbf6dc3f88f70c22a47e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "vendor"
+				},
+				{
+					"build" : "vendor/imgui",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-vendor.imgui-Debug-faaa81033d311e89670c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "vendor/imgui"
+				},
+				{
+					"build" : "vendor/imgui/src",
+					"jsonFile" : "directory-vendor.imgui.src-Debug-8c6101517f64e46215ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 0,
+					"source" : "vendor/imgui/src",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-c94b7c2814d5a21df52c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					],
+					"name" : "nes-emu",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "NesEmulator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NesEmulator-Debug-5923c72436d45b0a6a8e.json",
+					"name" : "NesEmulator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "imgui-lib::@3d36d253ea4da369a77d",
+					"jsonFile" : "target-imgui-lib-Debug-d3c1b99a17300503796a.json",
+					"name" : "imgui-lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "nes-emu-lib::@145eef247bfb46b6828c",
+					"jsonFile" : "target-nes-emu-lib-Debug-189499457073bcb719a7.json",
+					"name" : "nes-emu-lib",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Darek/Desktop/Programowanie/nes-emu/nes/out/build/x64-Debug",
+		"source" : "C:/Users/Darek/Desktop/Programowanie/nes-emu/nes"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

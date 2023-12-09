@@ -1,0 +1,24 @@
+# ninja log v5
+80	184	7233915547489448	src/CMakeFiles/nes-emu-lib.dir/Mapper.cpp.obj	ff023d6b6ba2fa26
+14	1090	7233915556532000	vendor/imgui/src/CMakeFiles/imgui-lib.dir/imgui.cpp.obj	13bbca991c30d3c5
+49	1428	7233915559972016	src/CMakeFiles/nes-emu-lib.dir/Cartridge.cpp.obj	29017f6b7fa8a30d
+35	463	7233915550299459	vendor/imgui/src/CMakeFiles/imgui-lib.dir/imgui_tables.cpp.obj	d3d0461ef33091b6
+27	558	7233915551249451	vendor/imgui/src/CMakeFiles/imgui-lib.dir/imgui_draw.cpp.obj	4c277622cf16ce7
+72	1893	7233915564631553	src/CMakeFiles/nes-emu-lib.dir/MainBus.cpp.obj	59083b4149b71caa
+42	707	7233915552639456	vendor/imgui/src/CMakeFiles/imgui-lib.dir/imgui_widgets.cpp.obj	4eb64f04bfd833fb
+64	1440	7233915560102027	src/CMakeFiles/nes-emu-lib.dir/PPU.cpp.obj	5d5af91fceef7367
+2109	2172	7233915567361549	lib/imgui-lib.lib	74d0961f22ff2036
+57	1934	7233915565031553	src/CMakeFiles/nes-emu-lib.dir/CPU6502.cpp.obj	7250dd127b403055
+21	2108	7233915566781570	vendor/imgui/src/CMakeFiles/imgui-lib.dir/imgui-SFML.cpp.obj	d0294d11c6ea040e
+6	3713	7233915582823568	CMakeFiles/NesEmulator.dir/main.cpp.obj	1ed1bba3098ea96d
+94	3905	7233915584726087	src/CMakeFiles/nes-emu-lib.dir/ui/NESConsoleMainWindow.cpp.obj	c07c5202966f6216
+87	6007	7233915605694375	src/CMakeFiles/nes-emu-lib.dir/NESConsole.cpp.obj	9f7591da1f4b2be
+6007	6131	7233915606804110	lib/nes-emu-lib.lib	2d9495ecc0b79563
+6132	6822	7233915613645377	bin/NesEmulator.exe	4143b8f3bc471af8
+39	572	7233949119168505	src/CMakeFiles/nes-emu-lib.dir/mappers/Mapper.cpp.obj	bb6cd86a560070aa
+24	1304	7233949126480527	src/CMakeFiles/nes-emu-lib.dir/PPU.cpp.obj	5d5af91fceef7367
+32	1713	7233949130570548	src/CMakeFiles/nes-emu-lib.dir/MainBus.cpp.obj	59083b4149b71caa
+18	1748	7233949130900534	src/CMakeFiles/nes-emu-lib.dir/CPU6502.cpp.obj	7250dd127b403055
+4	3463	7233949148068729	CMakeFiles/NesEmulator.dir/main.cpp.obj	1ed1bba3098ea96d
+53	3616	7233949149578713	src/CMakeFiles/nes-emu-lib.dir/ui/NESConsoleMainWindow.cpp.obj	c07c5202966f6216
+45	5644	7233949169800525	src/CMakeFiles/nes-emu-lib.dir/NESConsole.cpp.obj	9f7591da1f4b2be
