@@ -326,12 +326,12 @@ build src\CMakeFiles\nes-emu-lib.dir\NESConsole.cpp.obj: CXX_COMPILER__nes-emu-l
   TARGET_COMPILE_PDB = src\CMakeFiles\nes-emu-lib.dir\nes-emu-lib.pdb
   TARGET_PDB = lib\nes-emu-lib.pdb
 
-build src\CMakeFiles\nes-emu-lib.dir\ui\NESConsoleMainWindow.cpp.obj: CXX_COMPILER__nes-emu-lib_Debug C$:\Users\Darek\Desktop\Programowanie\nes-emu\nes\src\ui\NESConsoleMainWindow.cpp || cmake_object_order_depends_target_nes-emu-lib
+build src\CMakeFiles\nes-emu-lib.dir\UI\NESConsoleMainWindow.cpp.obj: CXX_COMPILER__nes-emu-lib_Debug C$:\Users\Darek\Desktop\Programowanie\nes-emu\nes\src\UI\NESConsoleMainWindow.cpp || cmake_object_order_depends_target_nes-emu-lib
   DEFINES = -DAL_LIBTYPE_STATIC -DFLAC__NO_DLL -DSFML_STATIC -DSTB_TEXTEDIT_KEYTYPE=unsigned
   FLAGS = /DWIN32 /D_WINDOWS /EHsc     /Zi /Ob0 /Od /RTC1  -MDd /std:c++latest -DAL_LIBTYPE_STATIC -DFLAC__NO_DLL -DSTB_TEXTEDIT_KEYTYPE=unsigned -DSFML_STATIC
   INCLUDES = -IC:\Users\Darek\Desktop\Programowanie\nes-emu\nes\include -IC:\Users\Darek\Desktop\Programowanie\nes-emu\nes\vendor\imgui\include -external:IC:\Users\Darek\.conan\data\sfml\2.5.1\_\_\package\a8d21d2d2792fdf49aae6441b1e689b376e4f0e0\include -external:IC:\Users\Darek\.conan\data\freetype\2.13.0\_\_\package\c4ca976bc1c6492af3efa84fc6f6461f87f0427c\include -external:IC:\Users\Darek\.conan\data\freetype\2.13.0\_\_\package\c4ca976bc1c6492af3efa84fc6f6461f87f0427c\include\freetype2 -external:IC:\Users\Darek\.conan\data\stb\cci.20220909\_\_\package\5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9\include -external:IC:\Users\Darek\.conan\data\flac\1.4.2\_\_\package\49f5cfddc9c70260d199e6a6094c4587d934bfa6\include -external:IC:\Users\Darek\.conan\data\openal-soft\1.22.2\_\_\package\164640aad040835ac89882393a96d89200694f04\include -external:IC:\Users\Darek\.conan\data\openal-soft\1.22.2\_\_\package\164640aad040835ac89882393a96d89200694f04\include\AL -external:IC:\Users\Darek\.conan\data\vorbis\1.3.7\_\_\package\49f5cfddc9c70260d199e6a6094c4587d934bfa6\include -external:IC:\Users\Darek\.conan\data\libpng\1.6.39\_\_\package\d16518e542c3c6c90681c55aae54dd4ee2ca8000\include -external:IC:\Users\Darek\.conan\data\bzip2\1.0.8\_\_\package\d74f69022acf854c1ce6f27efa07ccbb6504e4b1\include -external:IC:\Users\Darek\.conan\data\brotli\1.0.9\_\_\package\711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3\include -external:IC:\Users\Darek\.conan\data\brotli\1.0.9\_\_\package\711ad6c34b7444d45d75e7b8e8e880c6bd0d8cc3\include\brotli -external:IC:\Users\Darek\.conan\data\ogg\1.3.5\_\_\package\164640aad040835ac89882393a96d89200694f04\include -external:IC:\Users\Darek\.conan\data\zlib\1.2.13\_\_\package\164640aad040835ac89882393a96d89200694f04\include -external:W0
   OBJECT_DIR = src\CMakeFiles\nes-emu-lib.dir
-  OBJECT_FILE_DIR = src\CMakeFiles\nes-emu-lib.dir\ui
+  OBJECT_FILE_DIR = src\CMakeFiles\nes-emu-lib.dir\UI
   TARGET_COMPILE_PDB = src\CMakeFiles\nes-emu-lib.dir\nes-emu-lib.pdb
   TARGET_PDB = lib\nes-emu-lib.pdb
 
@@ -343,7 +343,7 @@ build src\CMakeFiles\nes-emu-lib.dir\ui\NESConsoleMainWindow.cpp.obj: CXX_COMPIL
 #############################################
 # Link the static library lib\nes-emu-lib.lib
 
-build lib\nes-emu-lib.lib: CXX_STATIC_LIBRARY_LINKER__nes-emu-lib_Debug src\CMakeFiles\nes-emu-lib.dir\Cartridge.cpp.obj src\CMakeFiles\nes-emu-lib.dir\CPU6502.cpp.obj src\CMakeFiles\nes-emu-lib.dir\PPU.cpp.obj src\CMakeFiles\nes-emu-lib.dir\MainBus.cpp.obj src\CMakeFiles\nes-emu-lib.dir\mappers\Mapper.cpp.obj src\CMakeFiles\nes-emu-lib.dir\NESConsole.cpp.obj src\CMakeFiles\nes-emu-lib.dir\ui\NESConsoleMainWindow.cpp.obj || lib\imgui-lib.lib
+build lib\nes-emu-lib.lib: CXX_STATIC_LIBRARY_LINKER__nes-emu-lib_Debug src\CMakeFiles\nes-emu-lib.dir\Cartridge.cpp.obj src\CMakeFiles\nes-emu-lib.dir\CPU6502.cpp.obj src\CMakeFiles\nes-emu-lib.dir\PPU.cpp.obj src\CMakeFiles\nes-emu-lib.dir\MainBus.cpp.obj src\CMakeFiles\nes-emu-lib.dir\mappers\Mapper.cpp.obj src\CMakeFiles\nes-emu-lib.dir\NESConsole.cpp.obj src\CMakeFiles\nes-emu-lib.dir\UI\NESConsoleMainWindow.cpp.obj || lib\imgui-lib.lib
   LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /EHsc     /Zi /Ob0 /Od /RTC1  -MDd
   LINK_FLAGS = /machine:x64
   OBJECT_DIR = src\CMakeFiles\nes-emu-lib.dir

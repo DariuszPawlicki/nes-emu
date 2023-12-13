@@ -341,7 +341,8 @@ healthchecksdb
 
 # Other
 .vscode/
-/bin
+bin/
+out/
 cmake-build-debug/
 imgui.ini
 imgui_demo.cpp
